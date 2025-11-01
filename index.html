@@ -6,138 +6,134 @@
   <title>Sorteos Arteaga</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: Arial, sans-serif;
       background-color: #000;
-      color: #FFD700;
+      color: #ffcc00;
+      text-align: center;
       margin: 0;
       padding: 0;
-      text-align: center;
     }
     header {
       background-color: #111;
-      padding: 15px;
-      border-bottom: 3px solid #FFD700;
+      padding: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 2px;
     }
-    header img {
-      height: 80px;
-      display: block;
-      margin: 0 auto 10px auto;
+    .maquinita {
+      margin: 30px auto;
+      padding: 20px;
+      background-color: #111;
+      width: 90%;
+      max-width: 600px;
+      border-radius: 10px;
     }
-    header h1 {
-      margin: 0;
-      font-size: 2em;
-      color: #FFD700;
+    .maquinita button {
+      background: #ff0000;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
     }
-    nav {
-      background-color: #222;
+    #boletos {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+      gap: 5px;
       padding: 10px;
+      margin: 20px;
     }
-    nav a {
-      color: #FFD700;
-      margin: 0 10px;
-      text-decoration: none;
+    .boleto {
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: black;
       font-weight: bold;
     }
-    nav a:hover {
-      text-decoration: underline;
-    }
-    section {
-      padding: 20px;
-    }
-    .carrusel {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      gap: 10px;
-      margin: 20px auto;
-      max-width: 90%;
-    }
-    .carrusel img {
-      scroll-snap-align: center;
-      width: 100%;
-      max-width: 400px;
-      border-radius: 8px;
-      border: 2px solid #FFD700;
-    }
+    .disponible { background-color: white; }
+    .apartado { background-color: orange; }
+    .vendido { background-color: black; color: white; }
     footer {
       background-color: #111;
-      color: #FFD700;
-      padding: 10px;
-      border-top: 3px solid #FFD700;
-      font-size: 0.9em;
+      color: #888;
+      padding: 15px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <img id="logo" src="" alt="Logo del sorteo" />
-    <h1>Sorteos Arteaga</h1>
-  </header>
+  <header>🎟️ Sorteos Arteaga 🎟️</header>
 
-  <nav>
-    <a href="#inicio">Inicio</a>
-    <a href="#premio">Premio</a>
-    <a href="#redes">Redes Sociales</a>
-    <a href="#transparencia">Legalidad y Transparencia</a>
-  </nav>
+  <div class="maquinita">
+    <h2>🎰 Maquinita de la Suerte</h2>
+    <input type="number" id="cantidad" placeholder="Cantidad (1-10000)" min="1" max="10000" />
+    <button onclick="generar()">Generar boletos</button>
+  </div>
 
-  <section id="inicio">
-    <h2>Participa y gana</h2>
-    <p id="descripcion">Cargando descripción...</p>
-  </section>
+  <h3>Lista de Boletos</h3>
+  <div id="boletos"></div>
+  <button onclick="apartar()">Apartar</button>
 
-  <section id="carruselFotos">
-    <h2>Fotos del Premio</h2>
-    <div class="carrusel" id="galeria"></div>
-  </section>
-
-  <section id="emisiones">
-    <h3>Emisiones disponibles</h3>
-    <p id="numEmisiones">Cargando...</p>
-  </section>
-
-  <section id="redes">
-    <h3>Síguenos</h3>
-    <p id="linksRedes">Cargando...</p>
-  </section>
-
-  <section id="transparencia">
-    <h3>Somos legalidad y transparencia</h3>
-    <p>Operamos con base en los sorteos de la Lotería Nacional.</p>
-  </section>
-
-  <footer>
-    <p>© 2025 Sorteos Arteaga - Todos los derechos reservados</p>
-  </footer>
+  <footer>© 2025 Sorteos Arteaga - Todos los derechos reservados</footer>
 
   <script>
-    const sheetURL = "https://script.google.com/macros/s/AKfycbx-vz_XeBrjKglfWPqcfMuVWK7UVXN16AB3u6ptMAO8YswUSmaGnDOCNBDOda5hkJgiUg/exec";
+    const boletosContainer = document.getElementById("boletos");
+    const seleccionados = new Set();
+    const totalBoletos = 100;
 
-    async function cargarDatos() {
-      const res = await fetch(sheetURL);
-      const data = await res.json();
-      const ultimo = data[data.length - 1];
-
-      document.getElementById("descripcion").textContent = ultimo.descripcion;
-      document.getElementById("numEmisiones").textContent = ultimo.emisiones;
-      document.getElementById("linksRedes").textContent = ultimo.redes;
-
-      if (ultimo.imagen) {
-        const galeria = document.getElementById("galeria");
-        const imagenes = ultimo.imagen.split(",").map(i => i.trim());
-        galeria.innerHTML = imagenes.map(src => `<img src="${src}" alt="Foto premio" />`).join("");
-      }
-
-      if (ultimo.titulo) {
-        document.title = ultimo.titulo;
-      }
-
-      if (ultimo.logo) {
-        document.getElementById("logo").src = ultimo.logo;
+    function mostrarBoletos() {
+      boletosContainer.innerHTML = "";
+      for (let i = 1; i <= totalBoletos; i++) {
+        const div = document.createElement("div");
+        div.className = "boleto disponible";
+        div.textContent = i;
+        div.onclick = () => seleccionar(div, i);
+        boletosContainer.appendChild(div);
       }
     }
 
-    cargarDatos();
+    function seleccionar(div, num) {
+      if (div.classList.contains("disponible")) {
+        div.classList.replace("disponible", "apartado");
+        seleccionados.add(num);
+      } else if (div.classList.contains("apartado")) {
+        div.classList.replace("apartado", "disponible");
+        seleccionados.delete(num);
+      }
+    }
+
+    function generar() {
+      const cantidad = parseInt(document.getElementById("cantidad").value);
+      if (isNaN(cantidad) || cantidad < 1 || cantidad > 10000) {
+        alert("Cantidad inválida");
+        return;
+      }
+      seleccionados.clear();
+      document.querySelectorAll(".boleto").forEach(b => b.className = "boleto disponible");
+      for (let i = 0; i < cantidad; i++) {
+        const num = Math.floor(Math.random() * totalBoletos) + 1;
+        const div = boletosContainer.children[num - 1];
+        div.classList.replace("disponible", "apartado");
+        seleccionados.add(num);
+      }
+    }
+
+    function apartar() {
+      if (seleccionados.size === 0) {
+        alert("Selecciona al menos un boleto");
+        return;
+      }
+      const nombre = prompt("Tu nombre completo:");
+      const estado = prompt("¿De qué estado eres?");
+      const telefono = prompt("Tu número de teléfono:");
+      const numeros = Array.from(seleccionados).join(", ");
+      const mensaje = `Hola! Quiero apartar los boletos ${numeros}. Soy ${nombre} de ${estado}. Mi número es ${telefono}.`;
+      const url = `https://wa.me/5635088487?text=${encodeURIComponent(mensaje)}`;
+      window.open(url, "_blank");
+    }
+
+    mostrarBoletos();
   </script>
 </body>
 </html>
