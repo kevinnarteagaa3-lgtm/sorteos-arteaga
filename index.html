@@ -1,59 +1,143 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sorteos Arteaga</title>
   <style>
     body {
+      font-family: 'Arial', sans-serif;
       background-color: #000;
       color: #FFD700;
-      font-family: Arial, sans-serif;
-      text-align: center;
       margin: 0;
       padding: 0;
+      text-align: center;
     }
     header {
       background-color: #111;
+      padding: 15px;
+      border-bottom: 3px solid #FFD700;
+    }
+    header img {
+      height: 80px;
+      display: block;
+      margin: 0 auto 10px auto;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2em;
+      color: #FFD700;
+    }
+    nav {
+      background-color: #222;
+      padding: 10px;
+    }
+    nav a {
+      color: #FFD700;
+      margin: 0 10px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    section {
       padding: 20px;
     }
-    h1 {
-      font-size: 2.5em;
-      margin: 0;
+    .carrusel {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 10px;
+      margin: 20px auto;
+      max-width: 90%;
     }
-    h2 {
-      color: orange;
-    }
-    .button {
-      display: inline-block;
-      background-color: red;
-      color: white;
-      padding: 12px 25px;
-      margin: 20px;
-      text-decoration: none;
-      border-radius: 5px;
-      font-weight: bold;
+    .carrusel img {
+      scroll-snap-align: center;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 8px;
+      border: 2px solid #FFD700;
     }
     footer {
       background-color: #111;
-      color: #888;
-      padding: 15px;
+      color: #FFD700;
+      padding: 10px;
+      border-top: 3px solid #FFD700;
       font-size: 0.9em;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>🎟️ Sorteos Arteaga</h1>
-    <h2>Participa y gana</h2>
+    <img id="logo" src="" alt="Logo del sorteo" />
+    <h1>Sorteos Arteaga</h1>
   </header>
 
-  <main>
-    <a href="admin.html" class="button">Ir al Panel de Administración</a>
-  </main>
+  <nav>
+    <a href="#inicio">Inicio</a>
+    <a href="#premio">Premio</a>
+    <a href="#redes">Redes Sociales</a>
+    <a href="#transparencia">Legalidad y Transparencia</a>
+  </nav>
+
+  <section id="inicio">
+    <h2>Participa y gana</h2>
+    <p id="descripcion">Cargando descripción...</p>
+  </section>
+
+  <section id="carruselFotos">
+    <h2>Fotos del Premio</h2>
+    <div class="carrusel" id="galeria"></div>
+  </section>
+
+  <section id="emisiones">
+    <h3>Emisiones disponibles</h3>
+    <p id="numEmisiones">Cargando...</p>
+  </section>
+
+  <section id="redes">
+    <h3>Síguenos</h3>
+    <p id="linksRedes">Cargando...</p>
+  </section>
+
+  <section id="transparencia">
+    <h3>Somos legalidad y transparencia</h3>
+    <p>Operamos con base en los sorteos de la Lotería Nacional.</p>
+  </section>
 
   <footer>
-    <p>© 2025 Sorteos Arteaga. Todos los derechos reservados.</p>
+    <p>© 2025 Sorteos Arteaga - Todos los derechos reservados</p>
   </footer>
+
+  <script>
+    const sheetURL = "https://script.google.com/macros/s/AKfycbx-vz_XeBrjKglfWPqcfMuVWK7UVXN16AB3u6ptMAO8YswUSmaGnDOCNBDOda5hkJgiUg/exec";
+
+    async function cargarDatos() {
+      const res = await fetch(sheetURL);
+      const data = await res.json();
+      const ultimo = data[data.length - 1];
+
+      document.getElementById("descripcion").textContent = ultimo.descripcion;
+      document.getElementById("numEmisiones").textContent = ultimo.emisiones;
+      document.getElementById("linksRedes").textContent = ultimo.redes;
+
+      if (ultimo.imagen) {
+        const galeria = document.getElementById("galeria");
+        const imagenes = ultimo.imagen.split(",").map(i => i.trim());
+        galeria.innerHTML = imagenes.map(src => `<img src="${src}" alt="Foto premio" />`).join("");
+      }
+
+      if (ultimo.titulo) {
+        document.title = ultimo.titulo;
+      }
+
+      if (ultimo.logo) {
+        document.getElementById("logo").src = ultimo.logo;
+      }
+    }
+
+    cargarDatos();
+  </script>
 </body>
 </html>
