@@ -1,172 +1,134 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel de Administración - Sorteos Arteaga</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #000;
-      color: #ffb300;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #111;
-      padding: 15px;
-      text-align: center;
-      border-bottom: 2px solid #ffb300;
-    }
-    h1 {
-      margin: 0;
-      font-size: 24px;
-    }
-    main {
-      padding: 20px;
-      max-width: 700px;
-      margin: auto;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    input, textarea, select, button {
-      width: 100%;
-      margin-top: 5px;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      font-size: 15px;
-    }
-    input, textarea, select {
-      background-color: #222;
-      color: #fff;
-    }
-    button {
-      background-color: #ffb300;
-      color: #000;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover {
-      background-color: #ffcc33;
-    }
-    .preview-img {
-      margin-top: 10px;
-      display: block;
-      max-width: 150px;
-      border: 2px solid #ffb300;
-      border-radius: 5px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Administración - Sorteos Arteaga</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #FFD700;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #FFD700;
+  }
+  form {
+    background-color: #111;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin: auto;
+  }
+  label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+  }
+  input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: none;
+    background-color: #222;
+    color: #fff;
+  }
+  input[type="file"] {
+    background-color: transparent;
+  }
+  button {
+    background-color: #FFD700;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+  }
+  button:hover {
+    background-color: #FFC300;
+  }
+</style>
 </head>
 <body>
-  <header>
-    <h1>Panel de Administración</h1>
-  </header>
+  <h1>⚙️ Panel de Administración</h1>
+  <form id="adminForm">
+    <label>Logo (desde tu fototeca):</label>
+    <input type="file" id="logo" accept="image/*">
 
-  <main>
-    <label>Logo del sitio:</label>
-    <input type="file" id="logoInput" accept="image/*" />
-    <img id="logoPreview" class="preview-img" />
+    <label>Fotos de la rifa (puedes subir varias):</label>
+    <input type="file" id="fotos" accept="image/*" multiple>
 
-    <label>Fotos para la página (puedes subir varias):</label>
-    <input type="file" id="photosInput" accept="image/*" multiple />
-    <div id="photosPreview"></div>
-
-    <label>Descripción del sorteo:</label>
-    <textarea id="descripcion" rows="3" placeholder="Escribe aquí la descripción..."></textarea>
-
-    <label>Número de emisiones:</label>
-    <input type="number" id="emisiones" placeholder="Ejemplo: 100" />
+    <label>Descripción de la rifa:</label>
+    <textarea id="descripcion" rows="3"></textarea>
 
     <label>Métodos de pago:</label>
-    <textarea id="metodos" rows="2" placeholder="Ejemplo: Transferencia, OXXO, PayPal..."></textarea>
+    <textarea id="pagos" rows="2" placeholder="Ejemplo: Tarjeta, OXXO, Transferencia..."></textarea>
 
     <label>Redes sociales:</label>
-    <textarea id="redes" rows="2" placeholder="Instagram, Facebook, TikTok..."></textarea>
+    <textarea id="redes" rows="2" placeholder="Facebook, Instagram..."></textarea>
 
-    <label>WhatsApp (con código de país):</label>
-    <input type="text" id="whatsapp" placeholder="Ejemplo: 525635088487" />
+    <label>Número de WhatsApp para contacto:</label>
+    <input type="text" id="whatsapp" placeholder="Ejemplo: +52 5635088487">
 
-    <label>Control de boletos vendidos:</label>
-    <textarea id="boletosVendidos" rows="3" placeholder="Escribe los números vendidos separados por comas, ej: 1,5,8"></textarea>
+    <label>Número de emisiones:</label>
+    <input type="number" id="emisiones" min="1" placeholder="Ejemplo: 10000">
 
-    <button onclick="guardarCambios()">Guardar cambios</button>
-
-    <p id="status"></p>
-  </main>
+    <button type="button" onclick="guardarDatos()">💾 Guardar configuración</button>
+  </form>
 
   <script>
-    // URL de Google Sheets conectada ✅
-    const SHEETS_URL = "https://script.google.com/macros/s/AKfycby0ybJQE5JN9yVriEylMkt7g_Z2Vy404HEzicqENdPWQ59vrIHovVXiGIntPbFdGc0Ogw/exec";
+  const scriptURL = "https://script.google.com/macros/s/AKfycbwhRb4ZuTHg5s7wEVqHLN6vwtcnHO0RPidtaZEqwXxN3__X1taodHGYUNdlqsp8PqEGCw/exec";
 
-    function guardarCambios() {
-      const descripcion = document.getElementById("descripcion").value;
-      const emisiones = document.getElementById("emisiones").value;
-      const metodos = document.getElementById("metodos").value;
-      const redes = document.getElementById("redes").value;
-      const whatsapp = document.getElementById("whatsapp").value;
-      const boletosVendidos = document.getElementById("boletosVendidos").value;
+  async function guardarDatos() {
+    const descripcion = document.getElementById('descripcion').value;
+    const pagos = document.getElementById('pagos').value;
+    const redes = document.getElementById('redes').value;
+    const whatsapp = document.getElementById('whatsapp').value;
+    const emisiones = document.getElementById('emisiones').value;
 
-      const logoFile = document.getElementById("logoInput").files[0];
-      const photosFiles = document.getElementById("photosInput").files;
+    // Logo y fotos locales convertidas a Base64
+    const logoFile = document.getElementById('logo').files[0];
+    const fotosFiles = document.getElementById('fotos').files;
 
-      // Convertir imágenes a Base64
-      const readerLogo = new FileReader();
-      readerLogo.onload = function (e) {
-        const logoBase64 = e.target.result;
+    const toBase64 = file => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+    });
 
-        const photosArray = [];
-        let filesProcessed = 0;
-
-        if (photosFiles.length === 0) {
-          enviarDatos(logoBase64, photosArray);
-        } else {
-          for (let i = 0; i < photosFiles.length; i++) {
-            const readerPhoto = new FileReader();
-            readerPhoto.onload = function (event) {
-              photosArray.push(event.target.result);
-              filesProcessed++;
-              if (filesProcessed === photosFiles.length) {
-                enviarDatos(logoBase64, photosArray);
-              }
-            };
-            readerPhoto.readAsDataURL(photosFiles[i]);
-          }
-        }
-      };
-      if (logoFile) readerLogo.readAsDataURL(logoFile);
-      else enviarDatos("", []);
+    const logoBase64 = logoFile ? await toBase64(logoFile) : "";
+    const fotosBase64 = [];
+    for (let f of fotosFiles) {
+      fotosBase64.push(await toBase64(f));
     }
 
-    function enviarDatos(logo, fotos) {
-      const data = {
-        logo: logo,
-        fotos: fotos,
-        descripcion: document.getElementById("descripcion").value,
-        emisiones: document.getElementById("emisiones").value,
-        metodos: document.getElementById("metodos").value,
-        redes: document.getElementById("redes").value,
-        whatsapp: document.getElementById("whatsapp").value,
-        boletosVendidos: document.getElementById("boletosVendidos").value
-      };
+    const data = {
+      logo: logoBase64,
+      fotos: fotosBase64,
+      descripcion,
+      pagos,
+      redes,
+      whatsapp,
+      emisiones
+    };
 
-      fetch(SHEETS_URL, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
-      })
-        .then((res) => res.text())
-        .then((msg) => {
-          document.getElementById("status").innerText = "✅ Cambios guardados correctamente.";
-        })
-        .catch((err) => {
-          document.getElementById("status").innerText = "❌ No se pudo conectar con Sheets.";
-        });
-    }
+    fetch(scriptURL, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(res => res.text())
+    .then(() => alert("✅ Datos guardados correctamente en Sheets"))
+    .catch(err => alert("❌ No se pudo conectar con Sheets: " + err));
+  }
   </script>
 </body>
 </html>
