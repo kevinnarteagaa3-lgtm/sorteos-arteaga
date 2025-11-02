@@ -1,307 +1,87 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Admin - Sorteos Arteaga</title>
-<style>
-  :root{--bg:#000;--accent:#FFD700;--card:#111;--muted:#999}
-  body{background:var(--bg);color:var(--accent);font-family:Arial,Helvetica,sans-serif;margin:0;padding:18px}
-  .wrap{max-width:920px;margin:0 auto}
-  h1{text-align:center;color:var(--accent);margin-bottom:8px}
-  .card{background:var(--card);padding:14px;border-radius:10px;margin-bottom:12px}
-  label{display:block;margin-top:10px;color:var(--muted);font-size:14px}
-  input[type=text], input[type=number], input[type=date], textarea {
-    width:100%;padding:10px;border-radius:6px;border:none;background:#000;color:var(--accent);
-    margin-top:6px;
-  }
-  input[type=file]{margin-top:8px;color:var(--muted)}
-  button{background:var(--accent);color:#000;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:700;margin-top:10px}
-  button.secondary{background:#008f39;color:#fff}
-  .preview{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .preview img{width:120px;height:80px;object-fit:cover;border-radius:6px;border:2px solid #222}
-  .row{display:flex;gap:10px;flex-wrap:wrap}
-  .col{flex:1;min-width:220px}
-  .small{font-size:13px;color:var(--muted)}
-  .maquinitaBox{background:#0f0f0f;padding:12px;border-radius:8px;margin-top:8px}
-  .tickets{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-  .ticket{background:#fff;color:#000;padding:8px 10px;border-radius:6px;font-weight:700}
-  #status{margin-top:8px;color:var(--muted)}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración - Sorteos Arteaga</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #FFD700;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    input, textarea {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #FFD700;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .preview img {
+      width: 150px;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Panel Admin — Sorteos Arteaga</h1>
+  <h1>Panel de Administración</h1>
 
-    <!-- LOGIN -->
-    <div id="loginCard" class="card">
-      <label>Contraseña del panel</label>
-      <input id="pw" type="password" placeholder="Escribe la contraseña">
-      <button id="loginBtn">Entrar</button>
-      <p class="small">Solo el administrador puede acceder. (contraseña por defecto: <strong>arteaga2025</strong>)</p>
-    </div>
+  <form id="form">
+    <input type="text" id="titulo" placeholder="Título de la rifa" required>
+    <textarea id="descripcion" placeholder="Descripción de la rifa"></textarea>
+    <input type="number" id="emisiones" placeholder="Número de emisiones">
+    <input type="text" id="redes" placeholder="Redes sociales (Facebook, Instagram)">
+    <input type="file" id="imagen" accept="image/*">
+    <div class="preview" id="preview"></div>
+    <button type="submit">Publicar</button>
+  </form>
 
-    <!-- PANEL -->
-    <div id="panel" style="display:none;">
-      <div class="card">
-        <div class="row">
-          <div class="col">
-            <label>Título</label>
-            <input id="titulo" type="text" placeholder="Ej. Gran Sorteo ...">
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbx-vz_XeBrjKglfWPqcfMuVWK7UVXN16AB3u6ptMAO8YswUSmaGnDOCNBDOda5hkJgiUg/exec";
+    let imagenBase64 = "";
 
-            <label>Descripción</label>
-            <textarea id="descripcion" rows="4" placeholder="Escribe los detalles de la rifa"></textarea>
+    document.getElementById("imagen").addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        imagenBase64 = reader.result;
+        document.getElementById("preview").innerHTML = `<img src="${imagenBase64}">`;
+      };
+      if (file) reader.readAsDataURL(file);
+    });
 
-            <label>Número de emisiones</label>
-            <input id="emisiones" type="number" min="1" placeholder="Ej. 10000">
+    document.getElementById("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = {
+        titulo: document.getElementById("titulo").value,
+        descripcion: document.getElementById("descripcion").value,
+        emisiones: document.getElementById("emisiones").value,
+        redes: document.getElementById("redes").value,
+        imagen: imagenBase64
+      };
 
-            <label>Fecha del evento</label>
-            <input id="fecha" type="date">
-          </div>
-
-          <div class="col">
-            <label>Logo (subir desde fototeca)</label>
-            <input id="logoFile" type="file" accept="image/*">
-
-            <div id="logoPreview" class="preview"></div>
-
-            <label>Fotos del premio (sube varias desde la fototeca)</label>
-            <input id="photosFiles" type="file" accept="image/*" multiple>
-            <div id="photosPreview" class="preview"></div>
-
-            <label>Facebook</label>
-            <input id="facebook" type="text" placeholder="https://facebook.com/...">
-
-            <label>Instagram</label>
-            <input id="instagram" type="text" placeholder="https://instagram.com/...">
-          </div>
-        </div>
-
-        <div style="margin-top:12px">
-          <button id="saveBtn">💾 Guardar y sincronizar</button>
-          <button id="forceBtn" class="secondary">🔄 Actualizar página pública</button>
-          <span id="status"></span>
-        </div>
-
-        <p class="small" style="margin-top:8px">Las imágenes se envían en forma segura a tu Apps Script, se guardan en Drive y se registra la fila en tu hoja.</p>
-      </div>
-
-      <!-- MAQUINITA -->
-      <div class="card">
-        <h3>Maquinita de la suerte (Admin)</h3>
-        <div class="maquinitaBox">
-          <label>Cantidad de boletos a generar</label>
-          <input id="genCantidad" type="number" min="1" max="10000" value="1" style="width:120px">
-
-          <label style="margin-top:8px">Rango máximo (usa el número de emisiones)</label>
-          <input id="genMax" type="number" min="1" value="100" style="width:120px">
-
-          <div style="margin-top:10px">
-            <button id="genBtn">🎰 Generar</button>
-            <button id="copyBtn" style="margin-left:8px">📋 Copiar selección</button>
-            <button id="saveTicketsBtn" style="margin-left:8px">📥 Guardar como registro</button>
-          </div>
-
-          <div class="tickets" id="ticketsArea"></div>
-          <p class="small">Puedes guardar los números generados (envía al Apps Script) o copiarlos para compartir.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-<script>
-/* ===== CONFIG ===== */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-vz_XeBrjKglfWPqcfMuVWK7UVXN16AB3u6ptMAO8YswUSmaGnDOCNBDOda5hkJgiUg/exec";
-const ADMIN_PW = "arteaga2025";
-
-/* ===== LOGIN ===== */
-document.getElementById('loginBtn').addEventListener('click', ()=>{
-  const v = document.getElementById('pw').value;
-  if(v === ADMIN_PW){
-    document.getElementById('loginCard').style.display='none';
-    document.getElementById('panel').style.display='block';
-    loadCurrent();
-  } else alert('Contraseña incorrecta');
-});
-
-/* ===== PREVIEWS: logo y fotos ===== */
-const logoFileInput = document.getElementById('logoFile');
-const logoPreview = document.getElementById('logoPreview');
-const photosInput = document.getElementById('photosFiles');
-const photosPreview = document.getElementById('photosPreview');
-
-logoFileInput.addEventListener('change', (e)=>{
-  logoPreview.innerHTML = '';
-  const f = e.target.files[0];
-  if(!f) return;
-  const url = URL.createObjectURL(f);
-  const img = document.createElement('img'); img.src = url;
-  logoPreview.appendChild(img);
-});
-
-photosInput.addEventListener('change', (e)=>{
-  photosPreview.innerHTML = '';
-  const files = Array.from(e.target.files);
-  files.forEach(f=>{
-    const url = URL.createObjectURL(f);
-    const img = document.createElement('img'); img.src = url;
-    photosPreview.appendChild(img);
-  });
-});
-
-/* ===== HELPERS para leer files como dataURL ===== */
-function readFileAsDataURL(file){
-  return new Promise((resolve,reject)=>{
-    const fr = new FileReader();
-    fr.onload = ()=> resolve(fr.result);
-    fr.onerror = ()=> reject(new Error('Error leyendo archivo'));
-    fr.readAsDataURL(file);
-  });
-}
-
-/* ===== CARGAR DATOS ACTUALES desde SCRIPT (GET) ===== */
-async function loadCurrent(){
-  try{
-    const r = await fetch(SCRIPT_URL);
-    const txt = await r.text();
-    const data = JSON.parse(txt);
-    // Manejar varias estructuras: array de arrays con headers o array de objetos
-    let obj = null;
-    if(Array.isArray(data)){
-      if(data.length>=2 && Array.isArray(data[0])){
-        const headers = data[0].map(h=>String(h).toLowerCase());
-        const values = data[data.length-1];
-        obj = {}; headers.forEach((h,i)=> obj[h] = values[i]);
-      } else {
-        obj = data[data.length-1] || data[0] || {};
-      }
-    } else obj = data || {};
-    // llenar campos si existen
-    document.getElementById('titulo').value = obj.titulo || obj.nombre || '';
-    document.getElementById('descripcion').value = obj.descripcion || '';
-    document.getElementById('emisiones').value = obj.emisiones || obj.numero_emisiones || '';
-    document.getElementById('fecha').value = obj.fecha || '';
-    document.getElementById('facebook').value = obj.facebook || '';
-    document.getElementById('instagram').value = obj.instagram || '';
-    // previews para logo y fotos (si tu script devuelve URLs públicas en logo/fotos)
-    if(obj.logo){
-      logoPreview.innerHTML = '<img src="'+obj.logo+'">';
-    }
-    if(obj.fotos || obj.imagenes || obj.photos){
-      const raw = obj.fotos || obj.imagenes || obj.photos;
-      const arr = (typeof raw === 'string') ? raw.split('|').map(s=>s.trim()).filter(Boolean) : raw;
-      photosPreview.innerHTML = '';
-      arr.forEach(u=> {
-        const img = document.createElement('img'); img.src = u; photosPreview.appendChild(img);
+      await fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify(data)
       });
-    }
-  }catch(err){
-    console.log('No se pudieron cargar datos (puede que la hoja esté vacía)', err);
-  }
-}
 
-/* ===== GUARDAR: leer archivos y enviar POST ===== */
-document.getElementById('saveBtn').addEventListener('click', async ()=>{
-  const titulo = document.getElementById('titulo').value;
-  const descripcion = document.getElementById('descripcion').value;
-  const emisiones = document.getElementById('emisiones').value;
-  const fecha = document.getElementById('fecha').value;
-  const facebook = document.getElementById('facebook').value;
-  const instagram = document.getElementById('instagram').value;
-
-  document.getElementById('status').textContent = 'Preparando...';
-
-  // leer logo y fotos a data URLs
-  let logoData = null;
-  if(logoFileInput.files.length){
-    try{ logoData = await readFileAsDataURL(logoFileInput.files[0]); } catch(e){ console.error(e); }
-  }
-
-  const photos = [];
-  for(let i=0;i<photosInput.files.length;i++){
-    try{
-      const d = await readFileAsDataURL(photosInput.files[i]);
-      photos.push(d);
-    }catch(e){ console.error('Error leyendo foto', e); }
-  }
-
-  const payload = {
-    titulo, descripcion, emisiones, fecha,
-    facebook, instagram,
-    logo: logoData, photos: photos
-  };
-
-  try{
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(payload)
+      alert("✅ Publicado correctamente. Refresca la página principal para ver los cambios.");
+      e.target.reset();
+      document.getElementById("preview").innerHTML = "";
     });
-    if(res.ok){
-      document.getElementById('status').textContent = '✅ Guardado y sincronizado';
-      // recargar previews (si script devuelve URLs en GET)
-      setTimeout(loadCurrent, 1200);
-    } else {
-      const txt = await res.text();
-      document.getElementById('status').textContent = '❌ Error al guardar: ' + txt;
-    }
-  }catch(e){
-    document.getElementById('status').textContent = '❌ Error conexión: ' + e.message;
-  }
-});
-
-/* ===== FORZAR ACTUALIZACIÓN (cache-bust) ===== */
-document.getElementById('forceBtn').addEventListener('click', ()=>{
-  // Intenta abrir la página pública con cache-bust
-  const base = location.origin + location.pathname.replace(/admin\\.html.*/,'');
-  window.open(base + '?_=' + Date.now(), '_blank');
-});
-
-/* ===== MAQUINITA de la suerte (admin) ===== */
-const ticketsArea = document.getElementById('ticketsArea');
-document.getElementById('genBtn').addEventListener('click', ()=>{
-  const n = parseInt(document.getElementById('genCantidad').value) || 1;
-  const max = parseInt(document.getElementById('genMax').value) || Math.max(100, parseInt(document.getElementById('emisiones').value)||100);
-  generateTickets(n, max);
-});
-
-function generateTickets(n, max){
-  ticketsArea.innerHTML = '';
-  const set = new Set();
-  while(set.size < n){
-    set.add(Math.floor(Math.random()*max) + 1);
-  }
-  const arr = Array.from(set).sort((a,b)=>a-b);
-  arr.forEach(num=>{
-    const span = document.createElement('div');
-    span.className = 'ticket';
-    span.textContent = String(num).padStart(4,'0');
-    ticketsArea.appendChild(span);
-  });
-}
-
-// copiar al portapapeles
-document.getElementById('copyBtn').addEventListener('click', ()=>{
-  const txt = Array.from(ticketsArea.querySelectorAll('.ticket')).map(t=>t.textContent).join(', ');
-  if(!txt) return alert('No hay números generados');
-  navigator.clipboard.writeText(txt).then(()=> alert('Copiado al portapapeles: ' + txt));
-});
-
-// guardar tickets como registro (envía a Sheets)
-document.getElementById('saveTicketsBtn').addEventListener('click', async ()=>{
-  const nums = Array.from(ticketsArea.querySelectorAll('.ticket')).map(t=>t.textContent).join(', ');
-  if(!nums) return alert('No hay números para guardar');
-  const payload = { generatedTickets: nums, generatedAt: new Date().toISOString() };
-  try{
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    if(res.ok) alert('✅ Números guardados en Sheets');
-    else alert('❌ Error al guardar números');
-  }catch(e){ alert('❌ Error: ' + e.message); }
-});
-</script>
+  </script>
 </body>
 </html>
