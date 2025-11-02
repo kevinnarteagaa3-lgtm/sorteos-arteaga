@@ -1,143 +1,150 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel de Administración - Sorteos Arteaga</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin - Sorteos Arteaga</title>
 <style>
-  body {
-    background-color: #000;
-    color: #FFD700;
-    font-family: Arial, sans-serif;
-    padding: 20px;
-  }
-  h1 {
-    text-align: center;
-    color: #FFD700;
-  }
-  form {
-    background: #111;
-    padding: 20px;
-    border-radius: 10px;
-    border: 2px solid #FFD700;
-    max-width: 500px;
-    margin: auto;
-  }
-  label {
-    display: block;
-    margin-top: 10px;
-    font-weight: bold;
-  }
-  input, textarea {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #FFD700;
-    border-radius: 5px;
-    background: #222;
-    color: #FFD700;
-    margin-top: 5px;
-  }
-  button {
-    margin-top: 15px;
-    background: #FFD700;
-    color: #000;
-    border: none;
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  .preview {
-    display: block;
-    margin: 15px auto;
-    width: 120px;
-    height: auto;
-    border: 2px solid #FFD700;
-    border-radius: 10px;
-  }
+  :root{--bg:#000;--accent:#FFD700}
+  body{background:var(--bg);color:var(--accent);font-family:Arial;padding:18px}
+  h1{ text-align:center }
+  .card{background:#111;padding:12px;border-radius:10px;max-width:900px;margin:12px auto}
+  input,textarea,select,button{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:none;background:#000;color:var(--accent)}
+  input[type=file]{padding:6px}
+  .preview{display:flex;gap:8px;flex-wrap:wrap}
+  .preview img{width:120px;height:80px;object-fit:cover;border-radius:6px;border:2px solid #222}
+  .tickets{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .ticket{padding:6px 8px;border-radius:6px;background:#fff;color:#000;cursor:pointer}
+  .ticket.sold{background:#000;color:#fff}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .col{flex:1;min-width:200px}
+  .note{font-size:13px;color:#999}
 </style>
 </head>
 <body>
-<h1>⚙️ Panel de Administración</h1>
+  <h1>⚙️ Panel Admin — Sorteos Arteaga</h1>
 
-<form id="adminForm">
-  <label for="logo">Logo del sitio:</label>
-  <input type="file" id="logo" accept="image/*">
-  <img id="preview" class="preview" src="" alt="Vista previa del logo">
+  <div class="card">
+    <label>Logo (subir desde fototeca)</label>
+    <input id="logoFile" type="file" accept="image/*">
+    <div id="logoPreview" class="preview"></div>
 
-  <label for="titulo">Título del sitio:</label>
-  <input type="text" id="titulo" placeholder="Ej: Sorteos Arteaga">
+    <label>Fotos del sorteo (subir varias)</label>
+    <input id="photosFiles" type="file" accept="image/*" multiple>
+    <div id="photosPreview" class="preview"></div>
 
-  <label for="descripcion">Descripción:</label>
-  <textarea id="descripcion" rows="3" placeholder="Ej: Participa y gana con premios increíbles."></textarea>
+    <label>Título</label>
+    <input id="titulo" type="text" placeholder="Título del sorteo">
 
-  <label for="whatsapp">Números de WhatsApp (separados por comas):</label>
-  <input type="text" id="whatsapp" placeholder="Ej: 521234567890, 528765432109">
+    <label>Descripción</label>
+    <textarea id="descripcion" rows="3" placeholder="Detalles del sorteo"></textarea>
 
-  <label for="pagos">Métodos de pago:</label>
-  <textarea id="pagos" rows="2" placeholder="Ej: Transferencia BBVA, OXXO, PayPal, etc."></textarea>
+    <div class="row">
+      <div class="col">
+        <label>Número de emisiones (total de boletos)</label>
+        <input id="emisiones" type="number" min="1" value="100">
+      </div>
+      <div class="col">
+        <label>Números de WhatsApp (separados por coma)</label>
+        <input id="whatsapp" type="text" placeholder="+52 56xxxxxxx">
+      </div>
+    </div>
 
-  <label for="emisiones">Número total de boletos (emisiones):</label>
-  <input type="number" id="emisiones" min="1" value="100">
+    <label>Métodos de pago</label>
+    <textarea id="pagos" rows="2" placeholder="Tarjeta, OXXO, Transferencia..."></textarea>
 
-  <button type="button" onclick="guardarCambios()">Guardar y Actualizar</button>
-</form>
+    <div class="row">
+      <div class="col">
+        <label>Facebook</label>
+        <input id="facebook" type="text" placeholder="https://facebook.com/...">
+      </div>
+      <div class="col">
+        <label>Instagram</label>
+        <input id="instagram" type="text" placeholder="https://instagram.com/...">
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <button id="saveBtn">💾 Guardar y sincronizar (Sheets + Drive)</button>
+      <button id="genListBtn" style="background:#008f39;color:#fff;margin-left:8px">🔁 Generar lista de boletos</button>
+    </div>
+
+    <p class="note">En "Generar lista" aparecerán los boletos para marcarlos como vendidos (negro). Luego guarda para enviar la configuración a tu hoja.</p>
+    <div id="ticketsArea" class="tickets"></div>
+    <p class="note">Tickets marcados en negro = vendidos. Blanco = disponible. Naranja = apartado (no aplicado aquí; apartados hacen los usuarios).</p>
+  </div>
 
 <script>
 const scriptURL = "https://script.google.com/macros/s/AKfycbzIi3yvzz0XIW42_wJEsoP0brcrqQs3sMq4xbjINjsTLY6EPSa1nEnP5zqEj589PUGvnA/exec";
+let logoBase64 = "";
+let photosBase64 = [];
+let soldSet = new Set();
 
-  let logoBase64 = "";
-
-  // 🖼️ Previsualiza y convierte el logo a Base64
-  document.getElementById("logo").addEventListener("change", function(event) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        logoBase64 = e.target.result;
-        document.getElementById("preview").src = logoBase64;
-      };
-      reader.readAsDataURL(file);
-    }
+// previews
+document.getElementById('logoFile').addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const url = URL.createObjectURL(f);
+  document.getElementById('logoPreview').innerHTML = '<img src="'+url+'">';
+  const fr = new FileReader(); fr.onload=()=> logoBase64 = fr.result; fr.readAsDataURL(f);
+});
+document.getElementById('photosFiles').addEventListener('change', e=>{
+  const files = Array.from(e.target.files);
+  photosBase64 = [];
+  const preview = document.getElementById('photosPreview'); preview.innerHTML='';
+  files.forEach(f=>{
+    const url = URL.createObjectURL(f);
+    const img = document.createElement('img'); img.src=url; preview.appendChild(img);
+    const fr = new FileReader(); fr.onload=()=> { photosBase64.push(fr.result); }; fr.readAsDataURL(f);
   });
+});
 
-  // 💾 Guarda los datos en Google Sheets
-  async function guardarCambios() {
-    const titulo = document.getElementById("titulo").value;
-    const descripcion = document.getElementById("descripcion").value;
-    const whatsapp = document.getElementById("whatsapp").value;
-    const pagos = document.getElementById("pagos").value;
-    const emisiones = document.getElementById("emisiones").value;
-
-    if (!titulo || !descripcion || !whatsapp || !emisiones) {
-      alert("Por favor, llena todos los campos obligatorios.");
-      return;
-    }
-
-    const data = {
-      titulo, descripcion, whatsapp, pagos, emisiones, logo: logoBase64
+// generar lista de boletos UI
+document.getElementById('genListBtn').addEventListener('click', ()=>{
+  const n = parseInt(document.getElementById('emisiones').value) || 100;
+  const area = document.getElementById('ticketsArea'); area.innerHTML='';
+  soldSet = new Set();
+  for(let i=1;i<=n;i++){
+    const d = document.createElement('div');
+    d.className = 'ticket';
+    d.textContent = i;
+    d.dataset.num = i;
+    d.onclick = ()=> {
+      if(d.classList.contains('sold')) { d.classList.remove('sold'); soldSet.delete(d.dataset.num); d.style.background='#fff'; d.style.color='#000'; }
+      else { d.classList.add('sold'); soldSet.add(d.dataset.num); d.style.background='#000'; d.style.color='#fff'; }
     };
-
-    try {
-      const res = await fetch(scriptURL, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
-      });
-      const text = await res.text();
-      if (text === "OK") {
-        alert("✅ Datos guardados correctamente. La página pública se actualizará automáticamente.");
-        document.getElementById("adminForm").reset();
-        document.getElementById("preview").src = "";
-        logoBase64 = "";
-      } else {
-        alert("Error al guardar: " + text);
-      }
-    } catch (err) {
-      alert("❌ No se pudo conectar con Google Sheets.");
-      console.error(err);
-    }
+    area.appendChild(d);
   }
+});
+
+// guardar y enviar a Apps Script
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
+  const titulo = document.getElementById('titulo').value;
+  const descripcion = document.getElementById('descripcion').value;
+  const emisiones = document.getElementById('emisiones').value;
+  const whatsapp = document.getElementById('whatsapp').value;
+  const pagos = document.getElementById('pagos').value;
+  const facebook = document.getElementById('facebook').value;
+  const instagram = document.getElementById('instagram').value;
+
+  const soldArray = Array.from(soldSet).map(x=>String(x)).sort((a,b)=>a-b);
+  const payload = {
+    titulo, descripcion, logo: logoBase64||"", photos: photosBase64||[], emisiones, pagos, facebook, instagram, whatsapp, soldNumbers: soldArray
+  };
+
+  try{
+    const res = await fetch(scriptURL, {
+      method:'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const txt = await res.text();
+    alert('✅ Guardado en Sheets. Respuesta: ' + txt);
+  }catch(e){
+    alert('❌ Error al conectar con Sheets. Revisa permisos / URL del script.');
+    console.error(e);
+  }
+});
 </script>
 </body>
 </html>
