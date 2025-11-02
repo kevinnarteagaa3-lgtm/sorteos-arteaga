@@ -3,132 +3,139 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel de Administración - Sorteos Arteaga</title>
+<title>Panel Admin - Sorteos Arteaga</title>
 <style>
   body {
     font-family: Arial, sans-serif;
     background-color: #000;
     color: #FFD700;
-    margin: 0;
     padding: 20px;
+    text-align: center;
   }
   h1 {
-    text-align: center;
     color: #FFD700;
-  }
-  form {
-    background-color: #111;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 600px;
-    margin: auto;
   }
   label {
     display: block;
-    margin-top: 15px;
+    margin-top: 10px;
     font-weight: bold;
   }
   input, textarea {
-    width: 100%;
-    padding: 10px;
+    width: 90%;
+    padding: 8px;
     margin-top: 5px;
     border-radius: 5px;
     border: none;
-    background-color: #222;
-    color: #fff;
   }
-  input[type="file"] {
-    background-color: transparent;
+  textarea {
+    height: 60px;
+  }
+  .file-input {
+    background-color: #111;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
   }
   button {
+    margin-top: 20px;
     background-color: #FFD700;
     color: #000;
-    border: none;
     padding: 10px 20px;
-    margin-top: 20px;
     font-weight: bold;
-    cursor: pointer;
     border-radius: 5px;
-    width: 100%;
+    border: none;
+    cursor: pointer;
   }
   button:hover {
     background-color: #FFC300;
   }
+  img {
+    margin-top: 10px;
+    max-width: 150px;
+    border-radius: 10px;
+  }
 </style>
 </head>
 <body>
-  <h1>⚙️ Panel de Administración</h1>
-  <form id="adminForm">
-    <label>Logo (desde tu fototeca):</label>
-    <input type="file" id="logo" accept="image/*">
+<h1>Panel de Administración</h1>
 
-    <label>Fotos de la rifa (puedes subir varias):</label>
-    <input type="file" id="fotos" accept="image/*" multiple>
+<label>Logo (desde tu dispositivo):</label>
+<input type="file" id="logoInput" accept="image/*">
+<img id="previewLogo" alt="Previsualización del logo">
 
-    <label>Descripción de la rifa:</label>
-    <textarea id="descripcion" rows="3"></textarea>
+<label>Fotos del carrusel (puedes subir varias):</label>
+<input type="file" id="fotosInput" multiple accept="image/*">
 
-    <label>Métodos de pago:</label>
-    <textarea id="pagos" rows="2" placeholder="Ejemplo: Tarjeta, OXXO, Transferencia..."></textarea>
+<label>Descripción:</label>
+<textarea id="descripcion"></textarea>
 
-    <label>Redes sociales:</label>
-    <textarea id="redes" rows="2" placeholder="Facebook, Instagram..."></textarea>
+<label>Métodos de pago:</label>
+<textarea id="pagos"></textarea>
 
-    <label>Número de WhatsApp para contacto:</label>
-    <input type="text" id="whatsapp" placeholder="Ejemplo: +52 5635088487">
+<label>Redes sociales:</label>
+<textarea id="redes"></textarea>
 
-    <label>Número de emisiones:</label>
-    <input type="number" id="emisiones" min="1" placeholder="Ejemplo: 10000">
+<label>Número de WhatsApp (con código de país, ej. +525635088487):</label>
+<input type="text" id="whatsapp">
 
-    <button type="button" onclick="guardarDatos()">💾 Guardar configuración</button>
-  </form>
+<label>Número de emisiones (boletos):</label>
+<input type="number" id="emisiones" min="1">
 
-  <script>
-  const scriptURL = "https://script.google.com/macros/s/AKfycbwhRb4ZuTHg5s7wEVqHLN6vwtcnHO0RPidtaZEqwXxN3__X1taodHGYUNdlqsp8PqEGCw/exec";
+<label>Boletos vendidos (separa por comas, ej. 5, 7, 10):</label>
+<input type="text" id="vendidos">
 
-  async function guardarDatos() {
-    const descripcion = document.getElementById('descripcion').value;
-    const pagos = document.getElementById('pagos').value;
-    const redes = document.getElementById('redes').value;
-    const whatsapp = document.getElementById('whatsapp').value;
-    const emisiones = document.getElementById('emisiones').value;
+<button onclick="guardarDatos()">💾 Guardar configuración</button>
 
-    // Logo y fotos locales convertidas a Base64
-    const logoFile = document.getElementById('logo').files[0];
-    const fotosFiles = document.getElementById('fotos').files;
+<p id="mensaje"></p>
 
-    const toBase64 = file => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-    });
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbwhRb4ZuTHg5s7wEVqHLN6vwtcnHO0RPidtaZEqwXxN3__X1taodHGYUNdlqsp8PqEGCw/exec";
+let logoBase64 = "";
+let fotosBase64 = [];
 
-    const logoBase64 = logoFile ? await toBase64(logoFile) : "";
-    const fotosBase64 = [];
-    for (let f of fotosFiles) {
-      fotosBase64.push(await toBase64(f));
-    }
+document.getElementById("logoInput").addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  const reader = new FileReader();
+  reader.onload = () => {
+    logoBase64 = reader.result;
+    document.getElementById("previewLogo").src = reader.result;
+  };
+  reader.readAsDataURL(file);
+});
 
-    const data = {
-      logo: logoBase64,
-      fotos: fotosBase64,
-      descripcion,
-      pagos,
-      redes,
-      whatsapp,
-      emisiones
-    };
-
-    fetch(scriptURL, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: { "Content-Type": "application/json" }
-    })
-    .then(res => res.text())
-    .then(() => alert("✅ Datos guardados correctamente en Sheets"))
-    .catch(err => alert("❌ No se pudo conectar con Sheets: " + err));
+document.getElementById("fotosInput").addEventListener("change", function(e) {
+  fotosBase64 = [];
+  const files = e.target.files;
+  for (const file of files) {
+    const reader = new FileReader();
+    reader.onload = () => fotosBase64.push(reader.result);
+    reader.readAsDataURL(file);
   }
-  </script>
+});
+
+async function guardarDatos() {
+  const data = {
+    logo: logoBase64,
+    fotos: fotosBase64,
+    descripcion: document.getElementById("descripcion").value,
+    pagos: document.getElementById("pagos").value,
+    redes: document.getElementById("redes").value,
+    whatsapp: document.getElementById("whatsapp").value,
+    emisiones: document.getElementById("emisiones").value,
+    vendidos: document.getElementById("vendidos").value
+  };
+
+  try {
+    const res = await fetch(scriptURL, {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
+    document.getElementById("mensaje").innerText = "✅ Configuración guardada correctamente.";
+  } catch (err) {
+    console.error(err);
+    document.getElementById("mensaje").innerText = "❌ No se pudo conectar con Sheets.";
+  }
+}
+</script>
 </body>
 </html>
