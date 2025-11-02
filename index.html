@@ -1,143 +1,203 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sorteos Arteaga</title>
-  <style>
-    body {
-      background-color: #000;
-      color: #FFD700;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      padding: 20px;
-      background-color: #111;
-    }
-    header img {
-      width: 100px;
-      border-radius: 50%;
-    }
-    h1 {
-      color: #FFD700;
-      margin-top: 10px;
-    }
-    .carrusel {
-      width: 100%;
-      max-width: 600px;
-      margin: 20px auto;
-      position: relative;
-    }
-    .carrusel img {
-      width: 100%;
-      border-radius: 10px;
-      display: none;
-    }
-    .carrusel img.active {
-      display: block;
-    }
-    .maquinita {
-      margin: 20px auto;
-      background-color: #222;
-      padding: 20px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 600px;
-    }
-    .boletos {
-      margin-top: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .boleto {
-      width: 60px;
-      height: 40px;
-      margin: 5px;
-      background-color: white;
-      color: black;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    footer {
-      background-color: #111;
-      padding: 15px;
-      font-size: 14px;
-      margin-top: 30px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorteos Arteaga - Participa y Gana</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #FFD700;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    background-color: #111;
+    padding: 15px;
+  }
+  header img {
+    width: 120px;
+    height: auto;
+    border-radius: 10px;
+  }
+  h1 {
+    color: #FFD700;
+  }
+  .maquinita, .info, .boletos-section {
+    background-color: #111;
+    border: 2px solid #FFD700;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px;
+  }
+  .boletos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+    margin: 15px;
+  }
+  .boleto {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .disponible { background-color: white; color: black; }
+  .apartado { background-color: orange; color: white; }
+  .vendido { background-color: black; color: white; }
+  button {
+    background-color: #FFD700;
+    color: #000;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  footer {
+    color: #777;
+    margin: 20px;
+    font-size: 0.9em;
+  }
+</style>
 </head>
 <body>
-  <header>
-    <img id="logo" src="https://via.placeholder.com/100" alt="Logo">
-    <h1>Sorteos Arteaga</h1>
-  </header>
+<header>
+  <img id="logo" src="" alt="Logo Sorteos Arteaga">
+  <h1 id="titulo">Sorteos Arteaga</h1>
+</header>
 
-  <div class="carrusel" id="carrusel"></div>
+<section class="info">
+  <p id="descripcion">Participa y gana con total legalidad y transparencia.</p>
+</section>
 
-  <div class="maquinita">
-    <h2>🎰 Maquinita de la Suerte</h2>
-    <p>Elige cuántos boletos generar (1-10000):</p>
-    <input type="number" id="cantidadBoletos" min="1" max="10000" value="1">
-    <button onclick="generarBoletos()">Generar</button>
-    <div class="boletos" id="boletosContainer"></div>
-  </div>
+<section class="maquinita">
+  <h2>🎰 Maquinita de la Suerte</h2>
+  <button onclick="girarMaquinita()">Girar Maquinita</button>
+  <div id="resultadoMaquinita" style="font-size: 24px; margin-top: 10px;"></div>
+</section>
 
-  <footer>
-    © 2025 Sorteos Arteaga. Todos los derechos reservados.
-  </footer>
+<section class="boletos-section">
+  <h2>🎟️ Elige tus números</h2>
+  <div id="listaBoletos" class="boletos"></div>
+  <button onclick="abrirFormulario()">Apartar Seleccionados</button>
+</section>
 
-  <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbx-vz_XeBrjKglfWPqcfMuVWK7UVXN16AB3u6ptMAO8YswUSmaGnDOCNBDOda5hkJgiUg/exec";
+<section id="formulario" style="display:none; margin-bottom:40px;">
+  <h3>🧾 Apartar Boletos</h3>
+  <p>Completa tus datos para confirmar tu apartado:</p>
+  <input type="text" id="nombre" placeholder="Nombre completo">
+  <select id="estado">
+    <option value="">Selecciona tu estado</option>
+    <option>Aguascalientes</option><option>Baja California</option><option>Baja California Sur</option>
+    <option>Campeche</option><option>Chiapas</option><option>Chihuahua</option>
+    <option>Ciudad de México</option><option>Coahuila</option><option>Colima</option>
+    <option>Durango</option><option>Guanajuato</option><option>Guerrero</option>
+    <option>Hidalgo</option><option>Jalisco</option><option>Estado de México</option>
+    <option>Michoacán</option><option>Morelos</option><option>Nayarit</option>
+    <option>Nuevo León</option><option>Oaxaca</option><option>Puebla</option>
+    <option>Querétaro</option><option>Quintana Roo</option><option>San Luis Potosí</option>
+    <option>Sinaloa</option><option>Sonora</option><option>Tabasco</option>
+    <option>Tamaulipas</option><option>Tlaxcala</option><option>Veracruz</option>
+    <option>Yucatán</option><option>Zacatecas</option>
+  </select>
+  <input type="tel" id="telefono" placeholder="Número de WhatsApp">
+  <button onclick="enviarWhatsApp()">Enviar a WhatsApp</button>
+</section>
 
-    async function cargarDatos() {
-      const res = await fetch(scriptURL);
-      const datos = await res.json();
+<footer>© 2025 Sorteos Arteaga — Todos los derechos reservados.</footer>
 
-      // Logo
-      if (datos[0].imagen) document.getElementById("logo").src = datos[0].imagen;
+<script>
+  // ⚙️ Conexión a tu Google Apps Script
+  const scriptURL = "https://script.google.com/macros/s/AKfycbx-vz_XeBrjKglfWPqcfMuVWK7UVXN16AB3u6ptMAO8YswUSmaGnDOCNBDOda5hkJgiUg/exec";
 
-      // Carrusel
-      const carrusel = document.getElementById("carrusel");
-      carrusel.innerHTML = "";
-      datos.forEach((item, i) => {
-        const img = document.createElement("img");
-        img.src = item.imagen;
-        if (i === 0) img.classList.add("active");
-        carrusel.appendChild(img);
-      });
+  let boletosSeleccionados = [];
+  let totalBoletos = 0;
+  let telefonoAdmin = "";
 
-      let index = 0;
-      setInterval(() => {
-        const imgs = document.querySelectorAll(".carrusel img");
-        imgs.forEach(img => img.classList.remove("active"));
-        index = (index + 1) % imgs.length;
-        imgs[index].classList.add("active");
-      }, 3000);
+  // 🔄 Carga los datos desde Google Sheets
+  async function cargarDatos() {
+    const res = await fetch(scriptURL);
+    const data = await res.json();
+    if (data.length > 0) {
+      const d = data[data.length - 1];
+      document.getElementById("titulo").textContent = d.titulo || "Sorteos Arteaga";
+      document.getElementById("descripcion").textContent = d.descripcion || "";
+      if (d.logo) document.getElementById("logo").src = d.logo;
+      telefonoAdmin = d.whatsapp?.split(",")[0] || "";
+      totalBoletos = parseInt(d.emisiones) || 100;
+    } else {
+      totalBoletos = 100;
+    }
+    generarBoletos(totalBoletos);
+  }
+
+  // 🎟️ Genera todos los boletos según el número de emisiones
+  function generarBoletos(n) {
+    const contenedor = document.getElementById("listaBoletos");
+    contenedor.innerHTML = "";
+    for (let i = 1; i <= n; i++) {
+      const div = document.createElement("div");
+      div.className = "boleto disponible";
+      div.textContent = i;
+      div.onclick = () => seleccionarBoleto(div, i);
+      contenedor.appendChild(div);
+    }
+  }
+
+  // 🟡 Selecciona o deselecciona boletos
+  function seleccionarBoleto(div, num) {
+    if (div.classList.contains("disponible")) {
+      div.classList.replace("disponible", "apartado");
+      boletosSeleccionados.push(num);
+    } else {
+      div.classList.replace("apartado", "disponible");
+      boletosSeleccionados = boletosSeleccionados.filter(b => b !== num);
+    }
+  }
+
+  // 🎰 Maquinita de la Suerte
+  function girarMaquinita() {
+    const num = Math.floor(Math.random() * totalBoletos) + 1;
+    document.getElementById("resultadoMaquinita").textContent = `Tu número de la suerte es: ${num}`;
+  }
+
+  // 📄 Abre el formulario
+  function abrirFormulario() {
+    if (boletosSeleccionados.length === 0) {
+      alert("Selecciona al menos un boleto antes de apartar.");
+      return;
+    }
+    document.getElementById("formulario").style.display = "block";
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+
+  // 💬 Enviar datos a WhatsApp
+  function enviarWhatsApp() {
+    const nombre = document.getElementById("nombre").value;
+    const estado = document.getElementById("estado").value;
+    const tel = document.getElementById("telefono").value;
+
+    if (!nombre || !estado || !tel) {
+      alert("Por favor, completa todos los campos.");
+      return;
     }
 
-    function generarBoletos() {
-      const cantidad = parseInt(document.getElementById("cantidadBoletos").value);
-      const container = document.getElementById("boletosContainer");
-      container.innerHTML = "";
-      for (let i = 0; i < cantidad; i++) {
-        const numero = Math.floor(Math.random() * 10000) + 1;
-        const div = document.createElement("div");
-        div.className = "boleto";
-        div.textContent = numero;
-        container.appendChild(div);
-      }
-    }
+    const mensaje = `Hola, soy ${nombre} de ${estado}. Quiero apartar los boletos: ${boletosSeleccionados.join(", ")}. Mi número es ${tel}.`;
+    const url = `https://wa.me/${telefonoAdmin.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, "_blank");
+  }
 
-    cargarDatos();
-  </script>
+  cargarDatos();
+</script>
 </body>
 </html>
 
