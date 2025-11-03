@@ -1,197 +1,96 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sorteos Arteaga</title>
-  <style>
-    body {
-      background-color: #111;
-      color: #FFD700;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #000;
-      padding: 20px;
-    }
-    header img {
-      max-width: 120px;
-      border-radius: 10px;
-    }
-    h1 {
-      color: #FFD700;
-      margin: 10px 0;
-    }
-    .descripcion {
-      max-width: 600px;
-      margin: 20px auto;
-      font-size: 1.1em;
-      line-height: 1.5em;
-    }
-    .carousel {
-      display: flex;
-      overflow: hidden;
-      justify-content: center;
-      margin: 20px auto;
-      width: 90%;
-      max-width: 500px;
-      border-radius: 10px;
-    }
-    .carousel img {
-      width: 100%;
-      transition: transform 0.5s ease-in-out;
-    }
-    .info {
-      background-color: #222;
-      padding: 20px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 600px;
-      margin: 20px auto;
-    }
-    .btn-apartar {
-      background-color: #FFD700;
-      color: #111;
-      padding: 12px 25px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-    .btn-apartar:hover {
-      background-color: #e6c200;
-    }
-    footer {
-      background-color: #000;
-      color: #FFD700;
-      padding: 15px;
-      font-size: 0.9em;
-      margin-top: 30px;
-    }
-    .numero {
-      background-color: white;
-      color: black;
-      border-radius: 4px;
-      display: inline-block;
-      margin: 4px;
-      padding: 5px 10px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .numero.seleccionado {
-      background-color: orange;
-      color: #fff;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorteos Arteaga</title>
+<style>
+  body {
+    background-color: #111;
+    color: #ffcc00;
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+  img.logo { width: 120px; margin: 10px auto; display: block; }
+  .carrusel img { width: 90%; max-width: 400px; border-radius: 10px; margin: 10px auto; }
+  .boletos { display: flex; flex-wrap: wrap; justify-content: center; }
+  .boleto {
+    width: 50px; height: 50px; margin: 4px; display: flex;
+    align-items: center; justify-content: center;
+    border-radius: 6px; cursor: pointer; font-weight: bold;
+  }
+  .disponible { background: #ffcc00; color: #111; }
+  .vendido { background: #555; color: #aaa; cursor: not-allowed; }
+  button { margin-top: 10px; padding: 10px; background: #ffcc00; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+  button:hover { background: #ffaa00; }
+</style>
 </head>
 <body>
-  <header>
-    <img id="logo" src="" alt="Logo Sorteos Arteaga">
-    <h1>🎟️ Sorteos Arteaga 🎟️</h1>
-  </header>
 
-  <div class="descripcion" id="descripcion"></div>
+<img class="logo" id="logo" src="">
+<h2 id="descripcion"></h2>
 
-  <div class="carousel" id="carrusel"></div>
+<div class="carrusel" id="carrusel"></div>
 
-  <div class="info">
-    <h2>Información del Sorteo</h2>
-    <p><strong>Redes Sociales:</strong> <span id="redes"></span></p>
-    <p><strong>Métodos de Pago:</strong> <span id="pagos"></span></p>
-    <p><strong>WhatsApp:</strong> <span id="whatsapp"></span></p>
-    <p><strong>Número de Emisiones:</strong> <span id="emisiones"></span></p>
-  </div>
+<h3>Métodos de pago</h3>
+<p id="pagos"></p>
 
-  <div>
-    <h2>Selecciona tu número</h2>
-    <div id="numeros"></div>
-    <button class="btn-apartar" onclick="apartarlo()">Apartar</button>
-  </div>
+<h3>Redes Sociales</h3>
+<p id="redes"></p>
 
-  <footer>
-    © 2025 Sorteos Arteaga — Todos los derechos reservados.
-  </footer>
+<h3>WhatsApp</h3>
+<p id="whatsapps"></p>
 
-  <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxtK3de3r3txVgVCpQm4bmAjbt4wZXdmQ-RRv61hx24J0l4MIepyJo0pg6JjlOtKMsk/exec";
-    let numeroSeleccionado = null;
-    let data = null;
+<h3>Selecciona tus números</h3>
+<div class="boletos" id="boletos"></div>
 
-    async function cargarDatos() {
-      try {
-        const res = await fetch(scriptURL);
-        data = await res.json();
-        if (!data || !data.length) return;
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbxtK3de3r3txVgVCpQm4bmAjbt4wZXdmQ-RRv61hx24J0l4MIepyJo0pg6JjlOtKMsk/exec";
 
-        const ultimo = data[data.length - 1];
-        document.getElementById("descripcion").textContent = ultimo.descripcion || "";
-        document.getElementById("redes").textContent = ultimo.redes || "";
-        document.getElementById("pagos").textContent = ultimo.pagos || "";
-        document.getElementById("whatsapp").textContent = ultimo.whatsapp || "";
-        document.getElementById("emisiones").textContent = ultimo.emisiones || "";
+async function cargarDatos() {
+  const res = await fetch(scriptURL);
+  const data = await res.json();
+  const d = data[data.length - 1];
 
-        if (ultimo.logo) document.getElementById("logo").src = ultimo.logo;
+  document.getElementById("logo").src = d.logo;
+  document.getElementById("descripcion").innerText = d.descripcion;
+  document.getElementById("pagos").innerText = d.pagos;
+  document.getElementById("redes").innerHTML = `
+    Facebook: ${d.redes.facebook}<br>
+    Instagram: ${d.redes.instagram}<br>
+    TikTok: ${d.redes.tiktok}
+  `;
+  document.getElementById("whatsapps").innerHTML = d.whatsapp.join("<br>");
 
-        const carrusel = document.getElementById("carrusel");
-        carrusel.innerHTML = "";
-        if (ultimo.imagenes && ultimo.imagenes.length) {
-          ultimo.imagenes.forEach(img64 => {
-            const img = document.createElement("img");
-            img.src = img64;
-            carrusel.appendChild(img);
-          });
-          iniciarCarrusel();
-        }
+  const carrusel = document.getElementById("carrusel");
+  d.fotos.forEach(f => {
+    const img = document.createElement("img");
+    img.src = f;
+    carrusel.appendChild(img);
+  });
 
-        generarNumeros(parseInt(ultimo.emisiones) || 50);
-      } catch (e) {
-        console.error("Error cargando datos:", e);
-      }
+  const cont = document.getElementById("boletos");
+  cont.innerHTML = "";
+  for (let i = 1; i <= d.emisiones; i++) {
+    const b = document.createElement("div");
+    b.className = "boleto " + (d.boletosVendidos.includes(i.toString()) ? "vendido" : "disponible");
+    b.innerText = i;
+    if (!d.boletosVendidos.includes(i.toString())) {
+      b.onclick = () => apartarNumero(i, d.whatsapp[0]);
     }
+    cont.appendChild(b);
+  }
+}
 
-    function generarNumeros(total) {
-      const cont = document.getElementById("numeros");
-      cont.innerHTML = "";
-      for (let i = 1; i <= total; i++) {
-        const num = document.createElement("div");
-        num.className = "numero";
-        num.textContent = i;
-        num.onclick = () => {
-          document.querySelectorAll(".numero").forEach(n => n.classList.remove("seleccionado"));
-          num.classList.add("seleccionado");
-          numeroSeleccionado = i;
-        };
-        cont.appendChild(num);
-      }
-    }
+function apartarNumero(num, whatsapp) {
+  const nombre = prompt("Tu nombre completo:");
+  const estado = prompt("Estado:");
+  const mensaje = `Hola! Quiero apartar el número ${num} del sorteo. Soy ${nombre} de ${estado}.`;
+  window.open(`https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`, "_blank");
+}
 
-    function apartarlo() {
-      if (!numeroSeleccionado || !data) {
-        alert("Selecciona un número antes de apartar.");
-        return;
-      }
-      const ultimo = data[data.length - 1];
-      const whatsapp = ultimo.whatsapp ? ultimo.whatsapp.replace(/\D/g, "") : "525635088487";
-      const mensaje = encodeURIComponent(
-        `¡Hola! Quiero apartar el número ${numeroSeleccionado} del sorteo "${ultimo.titulo}".\n\nMi nombre es: _______\nMi estado es: _______\nMi número es: _______\n\nGracias.`
-      );
-      window.open(`https://wa.me/${whatsapp}?text=${mensaje}`, "_blank");
-    }
+cargarDatos();
+</script>
 
-    function iniciarCarrusel() {
-      const imgs = document.querySelectorAll("#carrusel img");
-      let idx = 0;
-      setInterval(() => {
-        imgs.forEach((img, i) => img.style.transform = `translateX(${(i - idx) * 100}%)`);
-        idx = (idx + 1) % imgs.length;
-      }, 3000);
-    }
-
-    cargarDatos();
-  </script>
 </body>
 </html>
