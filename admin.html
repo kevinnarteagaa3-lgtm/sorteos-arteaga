@@ -3,162 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Administración - Sorteos Arteaga</title>
+  <title>Panel Admin - Sorteos Arteaga</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #111;
+      background-color: #000;
       color: #FFD700;
+      font-family: Arial, sans-serif;
+      text-align: center;
       margin: 0;
       padding: 20px;
-      text-align: center;
     }
-    header {
-      font-size: 24px;
-      margin-bottom: 20px;
-    }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background-color: #1a1a1a;
-      padding: 20px;
-      border-radius: 8px;
-    }
-    label {
+    input, textarea {
       display: block;
-      text-align: left;
-      margin-top: 15px;
-      color: #FFD700;
-    }
-    input[type="text"], input[type="number"], textarea {
-      width: 100%;
+      margin: 10px auto;
       padding: 10px;
-      margin-top: 5px;
+      width: 80%;
+      border-radius: 8px;
       border: none;
-      border-radius: 5px;
-      background-color: #222;
-      color: #FFD700;
-    }
-    input[type="file"] {
-      margin-top: 10px;
     }
     button {
-      margin-top: 20px;
-      padding: 12px 20px;
       background-color: #FFD700;
       color: black;
       border: none;
-      border-radius: 5px;
+      padding: 10px 20px;
       font-size: 16px;
+      border-radius: 8px;
       cursor: pointer;
-    }
-    button:hover {
-      background-color: #e6c200;
-    }
-    .preview-img {
-      max-width: 100%;
-      margin-top: 10px;
-      border-radius: 5px;
-    }
-    .preview-grid img {
-      width: 100px;
-      height: 100px;
-      margin: 5px;
-      object-fit: cover;
-      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <header>⚙️ Panel de Administración – Sorteos Arteaga</header>
-  <div class="container">
-    <label>Logo de la página</label>
-    <input type="file" id="logoInput" accept="image/*">
-    <img id="logoPreview" class="preview-img" src="" alt="Previsualización del logo">
-
-    <label>Carrusel de fotos (selecciona varias)</label>
-    <input type="file" id="carruselInput" accept="image/*" multiple>
-    <div id="carruselPreview" class="preview-grid"></div>
-
-    <label>Descripción del sorteo</label>
-    <textarea id="descripcion" rows="3" placeholder="Escribe la descripción..."></textarea>
-
-    <label>Número de emisiones (cantidad de boletos)</label>
-    <input type="number" id="emisiones" placeholder="Ej: 100">
-
-    <label>Métodos de pago</label>
-    <textarea id="metodosPago" rows="2" placeholder="Ej: Tarjeta, OXXO, Transferencia"></textarea>
-
-    <label>Redes sociales</label>
-    <input type="text" id="redes" placeholder="Ej: Facebook / Instagram / TikTok">
-
-    <label>Número de WhatsApp (para recibos de apartado)</label>
-    <input type="text" id="whatsapp" placeholder="Ej: +52 5635088487">
-
-    <label>Boletos vendidos (números separados por coma)</label>
-    <input type="text" id="vendidos" placeholder="Ej: 1,5,10,23">
-
-    <button onclick="guardarDatos()">💾 Guardar Cambios</button>
-    <p id="mensaje"></p>
-  </div>
+  <h1>Panel de Control</h1>
+  <input type="text" id="titulo" placeholder="Título de la rifa">
+  <textarea id="descripcion" placeholder="Descripción de la rifa"></textarea>
+  <input type="number" id="emisiones" placeholder="Cantidad de boletos">
+  <input type="text" id="logo" placeholder="URL del logo">
+  <input type="text" id="fotos" placeholder="URLs de fotos (separadas por comas)">
+  <input type="text" id="vendidos" placeholder="Números vendidos (ej: 1,5,7)">
+  <button onclick="guardar()">Guardar cambios</button>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwJ0EMnFHsOwv9flSk0tWjFzdRs-QKkAwSimrnwr0mfH_dCdOXRmC60CE72C-pHJ_dZXg/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxqkOljKP_RbvgLfI8hQga4qcpNsMN-qhbZzpTX-JHKUs-0F_Eidzg9D_FfhZayaddsvw/exec";
 
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-        reader.readAsDataURL(file);
-      });
-    }
-
-    document.getElementById("logoInput").addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const base64 = await fileToBase64(file);
-        document.getElementById("logoPreview").src = base64;
-      }
-    });
-
-    document.getElementById("carruselInput").addEventListener("change", async (e) => {
-      const previewDiv = document.getElementById("carruselPreview");
-      previewDiv.innerHTML = "";
-      for (const file of e.target.files) {
-        const img = document.createElement("img");
-        img.src = await fileToBase64(file);
-        previewDiv.appendChild(img);
-      }
-    });
-
-    async function guardarDatos() {
-      const logoSrc = document.getElementById("logoPreview").src || "";
-      const carruselImgs = Array.from(document.getElementById("carruselPreview").getElementsByTagName("img")).map(img => img.src);
-
+    async function guardar() {
       const data = {
-        logo: logoSrc,
-        carrusel: carruselImgs,
+        titulo: document.getElementById("titulo").value,
         descripcion: document.getElementById("descripcion").value,
-        emisiones: document.getElementById("emisiones").value,
-        metodosPago: document.getElementById("metodosPago").value,
-        redes: document.getElementById("redes").value,
-        whatsapp: document.getElementById("whatsapp").value,
-        vendidos: document.getElementById("vendidos").value
+        emisiones: parseInt(document.getElementById("emisiones").value),
+        logo: document.getElementById("logo").value,
+        fotos: document.getElementById("fotos").value.split(",").map(s => s.trim()),
+        vendidos: document.getElementById("vendidos").value.split(",").map(Number)
       };
 
-      document.getElementById("mensaje").innerText = "⏳ Guardando...";
-      try {
-        const response = await fetch(scriptURL, {
-          method: "POST",
-          body: JSON.stringify(data),
-          headers: { "Content-Type": "application/json" }
-        });
-        const text = await response.text();
-        document.getElementById("mensaje").innerText = "✅ Datos guardados correctamente.";
-      } catch (error) {
-        console.error(error);
-        document.getElementById("mensaje").innerText = "❌ Error al conectar con Sheets.";
+      const res = await fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
+
+      if (res.ok) {
+        alert("✅ Datos guardados correctamente");
+      } else {
+        alert("❌ Error al guardar");
       }
     }
   </script>
