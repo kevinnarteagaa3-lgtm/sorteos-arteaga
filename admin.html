@@ -1,141 +1,154 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Admin - Sorteos Arteaga</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #000;
-    color: #FFD700;
-    padding: 20px;
-    text-align: center;
-  }
-  h1 {
-    color: #FFD700;
-  }
-  label {
-    display: block;
-    margin-top: 10px;
-    font-weight: bold;
-  }
-  input, textarea {
-    width: 90%;
-    padding: 8px;
-    margin-top: 5px;
-    border-radius: 5px;
-    border: none;
-  }
-  textarea {
-    height: 60px;
-  }
-  .file-input {
-    background-color: #111;
-    padding: 10px;
-    border-radius: 8px;
-    margin-top: 10px;
-  }
-  button {
-    margin-top: 20px;
-    background-color: #FFD700;
-    color: #000;
-    padding: 10px 20px;
-    font-weight: bold;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-  }
-  button:hover {
-    background-color: #FFC300;
-  }
-  img {
-    margin-top: 10px;
-    max-width: 150px;
-    border-radius: 10px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración - Sorteos Arteaga</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #FFD700;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #FFD700;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 90%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: none;
+      outline: none;
+    }
+    button {
+      background-color: #FFD700;
+      color: black;
+      padding: 10px 20px;
+      margin-top: 20px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #e6c200;
+    }
+    .preview {
+      margin-top: 20px;
+    }
+    img {
+      max-width: 200px;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-<h1>Panel de Administración</h1>
+  <h1>Panel de Administración<br>Sorteos Arteaga</h1>
 
-<label>Logo (desde tu dispositivo):</label>
-<input type="file" id="logoInput" accept="image/*">
-<img id="previewLogo" alt="Previsualización del logo">
+  <label>Título del sorteo:</label>
+  <input type="text" id="titulo" placeholder="Ej. Gran Rifa de Navidad">
 
-<label>Fotos del carrusel (puedes subir varias):</label>
-<input type="file" id="fotosInput" multiple accept="image/*">
+  <label>Descripción:</label>
+  <textarea id="descripcion" placeholder="Detalles del sorteo..."></textarea>
 
-<label>Descripción:</label>
-<textarea id="descripcion"></textarea>
+  <label>Número de emisiones:</label>
+  <input type="number" id="emisiones" placeholder="Ej. 10000">
 
-<label>Métodos de pago:</label>
-<textarea id="pagos"></textarea>
+  <label>Redes sociales (Facebook / Instagram):</label>
+  <input type="text" id="redes" placeholder="Ej. facebook.com/sorteosarteaga">
 
-<label>Redes sociales:</label>
-<textarea id="redes"></textarea>
+  <label>Número de WhatsApp:</label>
+  <input type="text" id="whatsapp" placeholder="Ej. +52 5635088487">
 
-<label>Número de WhatsApp (con código de país, ej. +525635088487):</label>
-<input type="text" id="whatsapp">
+  <label>Métodos de pago:</label>
+  <textarea id="pagos" placeholder="Ej. Tarjeta, OXXO, Transferencia..."></textarea>
 
-<label>Número de emisiones (boletos):</label>
-<input type="number" id="emisiones" min="1">
+  <label>Logo del sitio:</label>
+  <input type="file" id="logoInput" accept="image/*">
+  <div class="preview"><img id="logoPreview" alt=""></div>
 
-<label>Boletos vendidos (separa por comas, ej. 5, 7, 10):</label>
-<input type="text" id="vendidos">
+  <label>Fotos de la rifa:</label>
+  <input type="file" id="imagenesInput" accept="image/*" multiple>
+  <div id="imagenesPreview" class="preview"></div>
 
-<button onclick="guardarDatos()">💾 Guardar configuración</button>
+  <button onclick="guardarDatos()">Guardar configuración</button>
 
-<p id="mensaje"></p>
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxtK3de3r3txVgVCpQm4bmAjbt4wZXdmQ-RRv61hx24J0l4MIepyJo0pg6JjlOtKMsk/exec";
 
-<script>
-const scriptURL = "https://script.google.com/macros/s/AKfycbwhRb4ZuTHg5s7wEVqHLN6vwtcnHO0RPidtaZEqwXxN3__X1taodHGYUNdlqsp8PqEGCw/exec";
-let logoBase64 = "";
-let fotosBase64 = [];
+    function convertirImagenBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
 
-document.getElementById("logoInput").addEventListener("change", function(e) {
-  const file = e.target.files[0];
-  const reader = new FileReader();
-  reader.onload = () => {
-    logoBase64 = reader.result;
-    document.getElementById("previewLogo").src = reader.result;
-  };
-  reader.readAsDataURL(file);
-});
+    async function guardarDatos() {
+      const titulo = document.getElementById("titulo").value;
+      const descripcion = document.getElementById("descripcion").value;
+      const emisiones = document.getElementById("emisiones").value;
+      const redes = document.getElementById("redes").value;
+      const whatsapp = document.getElementById("whatsapp").value;
+      const pagos = document.getElementById("pagos").value;
 
-document.getElementById("fotosInput").addEventListener("change", function(e) {
-  fotosBase64 = [];
-  const files = e.target.files;
-  for (const file of files) {
-    const reader = new FileReader();
-    reader.onload = () => fotosBase64.push(reader.result);
-    reader.readAsDataURL(file);
-  }
-});
+      const logoFile = document.getElementById("logoInput").files[0];
+      const logoBase64 = logoFile ? await convertirImagenBase64(logoFile) : "";
 
-async function guardarDatos() {
-  const data = {
-    logo: logoBase64,
-    fotos: fotosBase64,
-    descripcion: document.getElementById("descripcion").value,
-    pagos: document.getElementById("pagos").value,
-    redes: document.getElementById("redes").value,
-    whatsapp: document.getElementById("whatsapp").value,
-    emisiones: document.getElementById("emisiones").value,
-    vendidos: document.getElementById("vendidos").value
-  };
+      const imagenFiles = document.getElementById("imagenesInput").files;
+      const imagenesBase64 = [];
+      for (let file of imagenFiles) {
+        imagenesBase64.push(await convertirImagenBase64(file));
+      }
 
-  try {
-    const res = await fetch(scriptURL, {
-      method: "POST",
-      body: JSON.stringify(data)
+      const data = { titulo, descripcion, emisiones, redes, whatsapp, pagos, logo: logoBase64, imagenes: imagenesBase64 };
+
+      try {
+        await fetch(scriptURL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        alert("✅ Configuración guardada correctamente.");
+      } catch (error) {
+        alert("❌ Error al conectar con Sheets.");
+      }
+    }
+
+    // Previsualización de imágenes
+    document.getElementById("logoInput").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => document.getElementById("logoPreview").src = reader.result;
+        reader.readAsDataURL(file);
+      }
     });
-    document.getElementById("mensaje").innerText = "✅ Configuración guardada correctamente.";
-  } catch (err) {
-    console.error(err);
-    document.getElementById("mensaje").innerText = "❌ No se pudo conectar con Sheets.";
-  }
-}
-</script>
+
+    document.getElementById("imagenesInput").addEventListener("change", e => {
+      const cont = document.getElementById("imagenesPreview");
+      cont.innerHTML = "";
+      for (let file of e.target.files) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = document.createElement("img");
+          img.src = reader.result;
+          cont.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
 </body>
 </html>
