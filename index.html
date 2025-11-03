@@ -1,92 +1,109 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Sorteos Arteaga</title>
 <style>
-  body {
-    background-color: #111;
-    color: #ffcc00;
-    font-family: Arial, sans-serif;
-    text-align: center;
-  }
-  img.logo { width: 120px; margin: 10px auto; display: block; }
-  .carrusel img { width: 90%; max-width: 400px; border-radius: 10px; margin: 10px auto; }
-  .boletos { display: flex; flex-wrap: wrap; justify-content: center; }
-  .boleto {
-    width: 50px; height: 50px; margin: 4px; display: flex;
-    align-items: center; justify-content: center;
-    border-radius: 6px; cursor: pointer; font-weight: bold;
-  }
-  .disponible { background: #ffcc00; color: #111; }
-  .vendido { background: #555; color: #aaa; cursor: not-allowed; }
-  button { margin-top: 10px; padding: 10px; background: #ffcc00; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-  button:hover { background: #ffaa00; }
+body {
+  font-family: Arial, sans-serif;
+  background-color: #000;
+  color: #FFD700;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+header {
+  background: #111;
+  padding: 15px;
+}
+h1 { color: #FFD700; }
+.logo {
+  width: 120px;
+  height: auto;
+  margin: 10px auto;
+  display: block;
+}
+section {
+  margin: 20px auto;
+  width: 90%;
+  max-width: 600px;
+  background: #111;
+  padding: 15px;
+  border-radius: 8px;
+}
+img.rifa {
+  width: 100%;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+button {
+  background: orange;
+  color: #111;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+button:hover { background: #FFD700; }
+footer {
+  background: #111;
+  padding: 10px;
+  font-size: 14px;
+  margin-top: 30px;
+}
 </style>
 </head>
 <body>
 
-<img class="logo" id="logo" src="">
-<h2 id="descripcion"></h2>
+<header>
+  <img id="logo" class="logo" src="" alt="Logo Sorteos Arteaga" />
+  <h1>🎟️ Sorteos Arteaga 🎟️</h1>
+</header>
 
-<div class="carrusel" id="carrusel"></div>
+<section id="contenido">
+  <h2 id="titulo">Cargando información...</h2>
+  <p id="descripcion"></p>
+  <div id="imagenes"></div>
+  <p><strong>Emisiones:</strong> <span id="emisiones"></span></p>
+  <p><strong>Redes sociales:</strong> <span id="redes"></span></p>
+  <p><strong>Métodos de pago:</strong> <span id="pagos"></span></p>
+  <p><strong>WhatsApp:</strong> <span id="whatsapp"></span></p>
+</section>
 
-<h3>Métodos de pago</h3>
-<p id="pagos"></p>
-
-<h3>Redes Sociales</h3>
-<p id="redes"></p>
-
-<h3>WhatsApp</h3>
-<p id="whatsapps"></p>
-
-<h3>Selecciona tus números</h3>
-<div class="boletos" id="boletos"></div>
+<footer>
+  <p>© 2025 Sorteos Arteaga — Todos los derechos reservados</p>
+</footer>
 
 <script>
-const scriptURL = "https://script.google.com/macros/s/AKfycbxtK3de3r3txVgVCpQm4bmAjbt4wZXdmQ-RRv61hx24J0l4MIepyJo0pg6JjlOtKMsk/exec";
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycbym6UJ3Jt3NIZ9vr1Grg0K0FNIvPZzT0eBI3Rlt84HZp5K10w8yniTBzMopEoi2ATeF/exec";
 
 async function cargarDatos() {
-  const res = await fetch(scriptURL);
-  const data = await res.json();
-  const d = data[data.length - 1];
-
-  document.getElementById("logo").src = d.logo;
-  document.getElementById("descripcion").innerText = d.descripcion;
-  document.getElementById("pagos").innerText = d.pagos;
-  document.getElementById("redes").innerHTML = `
-    Facebook: ${d.redes.facebook}<br>
-    Instagram: ${d.redes.instagram}<br>
-    TikTok: ${d.redes.tiktok}
-  `;
-  document.getElementById("whatsapps").innerHTML = d.whatsapp.join("<br>");
-
-  const carrusel = document.getElementById("carrusel");
-  d.fotos.forEach(f => {
-    const img = document.createElement("img");
-    img.src = f;
-    carrusel.appendChild(img);
-  });
-
-  const cont = document.getElementById("boletos");
-  cont.innerHTML = "";
-  for (let i = 1; i <= d.emisiones; i++) {
-    const b = document.createElement("div");
-    b.className = "boleto " + (d.boletosVendidos.includes(i.toString()) ? "vendido" : "disponible");
-    b.innerText = i;
-    if (!d.boletosVendidos.includes(i.toString())) {
-      b.onclick = () => apartarNumero(i, d.whatsapp[0]);
+  try {
+    const res = await fetch(SHEETS_URL);
+    const data = await res.json();
+    if (data.length > 0) {
+      const ultimo = data[data.length - 1];
+      document.getElementById("titulo").textContent = ultimo.titulo || "Rifa actual";
+      document.getElementById("descripcion").textContent = ultimo.descripcion || "";
+      document.getElementById("emisiones").textContent = ultimo.emisiones || "0";
+      document.getElementById("redes").textContent = ultimo.redes || "";
+      document.getElementById("pagos").textContent = ultimo.pagos || "";
+      document.getElementById("whatsapp").textContent = ultimo.whatsapp || "";
+      if (ultimo.imagen) {
+        const img = document.createElement("img");
+        img.src = ultimo.imagen;
+        img.classList.add("rifa");
+        document.getElementById("imagenes").appendChild(img);
+      }
+      if (ultimo.logo) {
+        document.getElementById("logo").src = ultimo.logo;
+      }
     }
-    cont.appendChild(b);
+  } catch (err) {
+    console.error("Error cargando datos:", err);
+    document.getElementById("titulo").textContent = "No se pudieron cargar los datos.";
   }
-}
-
-function apartarNumero(num, whatsapp) {
-  const nombre = prompt("Tu nombre completo:");
-  const estado = prompt("Estado:");
-  const mensaje = `Hola! Quiero apartar el número ${num} del sorteo. Soy ${nombre} de ${estado}.`;
-  window.open(`https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`, "_blank");
 }
 
 cargarDatos();
