@@ -1,113 +1,78 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sorteos Arteaga</title>
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background-color: #000;
-  color: #FFD700;
-  text-align: center;
-  margin: 0;
-  padding: 0;
-}
-header {
-  background: #111;
-  padding: 15px;
-}
-h1 { color: #FFD700; }
-.logo {
-  width: 120px;
-  height: auto;
-  margin: 10px auto;
-  display: block;
-}
-section {
-  margin: 20px auto;
-  width: 90%;
-  max-width: 600px;
-  background: #111;
-  padding: 15px;
-  border-radius: 8px;
-}
-img.rifa {
-  width: 100%;
-  border-radius: 6px;
-  margin-top: 10px;
-}
-button {
-  background: orange;
-  color: #111;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-button:hover { background: #FFD700; }
-footer {
-  background: #111;
-  padding: 10px;
-  font-size: 14px;
-  margin-top: 30px;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorteos Arteaga</title>
+  <style>
+    body { background: #121212; color: #FFD700; font-family: Arial; text-align: center; margin: 0; }
+    header { background: #1f1f1f; padding: 15px; }
+    header img { width: 120px; border-radius: 10px; }
+    .numeros { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px; padding: 20px; }
+    .numero { background: white; color: black; font-weight: bold; padding: 10px; border-radius: 5px; cursor: pointer; }
+    .numero.vendido { background: #333; color: #aaa; cursor: not-allowed; }
+  </style>
 </head>
 <body>
+  <header>
+    <img id="logo" src="">
+    <h1 id="titulo">Sorteos Arteaga</h1>
+  </header>
 
-<header>
-  <img id="logo" class="logo" src="" alt="Logo Sorteos Arteaga" />
-  <h1>🎟️ Sorteos Arteaga 🎟️</h1>
-</header>
-
-<section id="contenido">
-  <h2 id="titulo">Cargando información...</h2>
   <p id="descripcion"></p>
-  <div id="imagenes"></div>
-  <p><strong>Emisiones:</strong> <span id="emisiones"></span></p>
-  <p><strong>Redes sociales:</strong> <span id="redes"></span></p>
-  <p><strong>Métodos de pago:</strong> <span id="pagos"></span></p>
-  <p><strong>WhatsApp:</strong> <span id="whatsapp"></span></p>
-</section>
 
-<footer>
-  <p>© 2025 Sorteos Arteaga — Todos los derechos reservados</p>
-</footer>
+  <div id="numeros" class="numeros"></div>
 
-<script>
-const SHEETS_URL = "https://script.google.com/macros/s/AKfycbym6UJ3Jt3NIZ9vr1Grg0K0FNIvPZzT0eBI3Rlt84HZp5K10w8yniTBzMopEoi2ATeF/exec";
+  <script>
+    const SHEETS_URL = "https://script.google.com/macros/s/AKfycbym6UJ3Jt3NIZ9vr1Grg0K0FNIvPZzT0eBI3Rlt84HZp5K10w8yniTBzMopEoi2ATeF/exec";
+    const WHATSAPP = "525635088487";
 
-async function cargarDatos() {
-  try {
-    const res = await fetch(SHEETS_URL);
-    const data = await res.json();
-    if (data.length > 0) {
-      const ultimo = data[data.length - 1];
-      document.getElementById("titulo").textContent = ultimo.titulo || "Rifa actual";
-      document.getElementById("descripcion").textContent = ultimo.descripcion || "";
-      document.getElementById("emisiones").textContent = ultimo.emisiones || "0";
-      document.getElementById("redes").textContent = ultimo.redes || "";
-      document.getElementById("pagos").textContent = ultimo.pagos || "";
-      document.getElementById("whatsapp").textContent = ultimo.whatsapp || "";
-      if (ultimo.imagen) {
-        const img = document.createElement("img");
-        img.src = ultimo.imagen;
-        img.classList.add("rifa");
-        document.getElementById("imagenes").appendChild(img);
-      }
-      if (ultimo.logo) {
-        document.getElementById("logo").src = ultimo.logo;
+    async function cargar() {
+      const res = await fetch(SHEETS_URL);
+      const datos = await res.json();
+      if (!datos.length) return;
+
+      const d = datos[datos.length - 1];
+      document.getElementById("titulo").innerText = d.titulo || "Sorteos Arteaga";
+      document.getElementById("descripcion").innerText = d.descripcion || "";
+      if (d.logo) document.getElementById("logo").src = d.logo;
+
+      const total = parseInt(d.emisiones) || 50;
+      const apartados = JSON.parse(d.apartados || "[]");
+
+      const contenedor = document.getElementById("numeros");
+      contenedor.innerHTML = "";
+
+      for (let i = 1; i <= total; i++) {
+        const div = document.createElement("div");
+        div.innerText = i;
+        div.className = "numero" + (apartados.includes(i) ? " vendido" : "");
+        if (!apartados.includes(i)) {
+          div.onclick = () => apartar(i);
+        }
+        contenedor.appendChild(div);
       }
     }
-  } catch (err) {
-    console.error("Error cargando datos:", err);
-    document.getElementById("titulo").textContent = "No se pudieron cargar los datos.";
-  }
-}
 
-cargarDatos();
-</script>
+    async function apartar(num) {
+      const nombre = prompt("Tu nombre:");
+      const telefono = prompt("Tu número:");
+      const estado = prompt("Tu estado:");
+      if (!nombre || !telefono || !estado) return;
 
+      const mensaje = `Hola! Quiero apartar el número ${num}.\nNombre: ${nombre}\nTeléfono: ${telefono}\nEstado: ${estado}`;
+      window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensaje)}`, "_blank");
+
+      await fetch(SHEETS_URL, {
+        method: "POST",
+        body: JSON.stringify({ tipo: "actualizarApartado", numero: num }),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      cargar(); // refresca lista
+    }
+
+    cargar();
+  </script>
 </body>
 </html>
