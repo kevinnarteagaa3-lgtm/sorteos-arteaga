@@ -1,170 +1,166 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel de Administración - Sorteos Arteaga</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #111;
-    color: #f1c40f;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-  }
-  header {
-    background-color: #000;
-    padding: 20px;
-    font-size: 24px;
-    font-weight: bold;
-  }
-  .container {
-    max-width: 600px;
-    margin: 30px auto;
-    background: #1a1a1a;
-    padding: 25px;
-    border-radius: 8px;
-  }
-  input, textarea, button, select {
-    width: 100%;
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 5px;
-    border: none;
-    font-size: 16px;
-  }
-  button {
-    background-color: #f1c40f;
-    color: black;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  button:hover {
-    background-color: #ffcc00;
-  }
-  label {
-    text-align: left;
-    display: block;
-    margin-top: 10px;
-    color: #f1c40f;
-  }
-  img.preview {
-    max-width: 100%;
-    margin-top: 10px;
-    border-radius: 5px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración - Sorteos Arteaga</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #FFD700;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    header {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background-color: #1a1a1a;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    label {
+      display: block;
+      text-align: left;
+      margin-top: 15px;
+      color: #FFD700;
+    }
+    input[type="text"], input[type="number"], textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: none;
+      border-radius: 5px;
+      background-color: #222;
+      color: #FFD700;
+    }
+    input[type="file"] {
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      background-color: #FFD700;
+      color: black;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #e6c200;
+    }
+    .preview-img {
+      max-width: 100%;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
+    .preview-grid img {
+      width: 100px;
+      height: 100px;
+      margin: 5px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+  </style>
 </head>
 <body>
-<header>⚙️ Panel de Administración</header>
+  <header>⚙️ Panel de Administración – Sorteos Arteaga</header>
+  <div class="container">
+    <label>Logo de la página</label>
+    <input type="file" id="logoInput" accept="image/*">
+    <img id="logoPreview" class="preview-img" src="" alt="Previsualización del logo">
 
-<div class="container">
-  <label>Logo de la página</label>
-  <input type="file" id="logo" accept="image/*">
-  <img id="previewLogo" class="preview" alt="Previsualización del logo">
+    <label>Carrusel de fotos (selecciona varias)</label>
+    <input type="file" id="carruselInput" accept="image/*" multiple>
+    <div id="carruselPreview" class="preview-grid"></div>
 
-  <label>Carrusel de fotos</label>
-  <input type="file" id="carrusel" accept="image/*" multiple>
-  <div id="previewCarrusel"></div>
+    <label>Descripción del sorteo</label>
+    <textarea id="descripcion" rows="3" placeholder="Escribe la descripción..."></textarea>
 
-  <label>Descripción</label>
-  <textarea id="descripcion" rows="3" placeholder="Describe tu sorteo..."></textarea>
+    <label>Número de emisiones (cantidad de boletos)</label>
+    <input type="number" id="emisiones" placeholder="Ej: 100">
 
-  <label>Número de emisiones</label>
-  <input type="number" id="emisiones" placeholder="Ej. 500">
+    <label>Métodos de pago</label>
+    <textarea id="metodosPago" rows="2" placeholder="Ej: Tarjeta, OXXO, Transferencia"></textarea>
 
-  <label>Métodos de pago</label>
-  <textarea id="metodosPago" rows="2" placeholder="Ej. Transferencia, Oxxo, PayPal..."></textarea>
+    <label>Redes sociales</label>
+    <input type="text" id="redes" placeholder="Ej: Facebook / Instagram / TikTok">
 
-  <label>Redes sociales</label>
-  <input type="text" id="redes" placeholder="Ej. Facebook, Instagram, TikTok...">
+    <label>Número de WhatsApp (para recibos de apartado)</label>
+    <input type="text" id="whatsapp" placeholder="Ej: +52 5635088487">
 
-  <label>Número de WhatsApp</label>
-  <input type="text" id="whatsapp" placeholder="Ej. +52 5635088487">
+    <label>Boletos vendidos (números separados por coma)</label>
+    <input type="text" id="vendidos" placeholder="Ej: 1,5,10,23">
 
-  <label>Boletos vendidos (números separados por coma)</label>
-  <input type="text" id="vendidos" placeholder="Ej. 1,5,10,15">
+    <button onclick="guardarDatos()">💾 Guardar Cambios</button>
+    <p id="mensaje"></p>
+  </div>
 
-  <button onclick="guardarDatos()">💾 Guardar Cambios</button>
-  <p id="mensaje"></p>
-</div>
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwJ0EMnFHsOwv9flSk0tWjFzdRs-QKkAwSimrnwr0mfH_dCdOXRmC60CE72C-pHJ_dZXg/exec";
 
-<script>
-const scriptURL = "https://script.google.com/macros/s/AKfycby-atfTTEvyN2LhhFnjlngvGOnfXYtqfIhEZbqWJjZ06Y9-MGmTDmzvqnYVLcDUK-bbIw/exec";
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
 
-function toBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+    document.getElementById("logoInput").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const base64 = await fileToBase64(file);
+        document.getElementById("logoPreview").src = base64;
+      }
+    });
 
-async function guardarDatos() {
-  const logoFile = document.getElementById("logo").files[0];
-  const carruselFiles = document.getElementById("carrusel").files;
+    document.getElementById("carruselInput").addEventListener("change", async (e) => {
+      const previewDiv = document.getElementById("carruselPreview");
+      previewDiv.innerHTML = "";
+      for (const file of e.target.files) {
+        const img = document.createElement("img");
+        img.src = await fileToBase64(file);
+        previewDiv.appendChild(img);
+      }
+    });
 
-  let logoBase64 = "";
-  if (logoFile) logoBase64 = await toBase64(logoFile);
+    async function guardarDatos() {
+      const logoSrc = document.getElementById("logoPreview").src || "";
+      const carruselImgs = Array.from(document.getElementById("carruselPreview").getElementsByTagName("img")).map(img => img.src);
 
-  let carruselBase64 = [];
-  for (const file of carruselFiles) {
-    carruselBase64.push(await toBase64(file));
-  }
+      const data = {
+        logo: logoSrc,
+        carrusel: carruselImgs,
+        descripcion: document.getElementById("descripcion").value,
+        emisiones: document.getElementById("emisiones").value,
+        metodosPago: document.getElementById("metodosPago").value,
+        redes: document.getElementById("redes").value,
+        whatsapp: document.getElementById("whatsapp").value,
+        vendidos: document.getElementById("vendidos").value
+      };
 
-  const data = {
-    logo: logoBase64,
-    carrusel: carruselBase64,
-    descripcion: document.getElementById("descripcion").value,
-    emisiones: document.getElementById("emisiones").value,
-    metodosPago: document.getElementById("metodosPago").value,
-    redes: document.getElementById("redes").value,
-    whatsapp: document.getElementById("whatsapp").value,
-    vendidos: document.getElementById("vendidos").value
-  };
-
-  document.getElementById("mensaje").innerText = "⏳ Guardando datos...";
-
-  fetch(scriptURL, {
-    method: "POST",
-    body: JSON.stringify(data),
-    headers: { "Content-Type": "application/json" }
-  })
-  .then(res => res.text())
-  .then(() => {
-    document.getElementById("mensaje").innerText = "✅ Datos guardados correctamente";
-  })
-  .catch(() => {
-    document.getElementById("mensaje").innerText = "❌ Error al conectar con Sheets";
-  });
-}
-
-// Previsualizaciones
-document.getElementById("logo").addEventListener("change", e => {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = () => document.getElementById("previewLogo").src = reader.result;
-    reader.readAsDataURL(file);
-  }
-});
-
-document.getElementById("carrusel").addEventListener("change", e => {
-  const preview = document.getElementById("previewCarrusel");
-  preview.innerHTML = "";
-  for (const file of e.target.files) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = document.createElement("img");
-      img.src = reader.result;
-      img.className = "preview";
-      preview.appendChild(img);
-    };
-    reader.readAsDataURL(file);
-  }
-});
-</script>
+      document.getElementById("mensaje").innerText = "⏳ Guardando...";
+      try {
+        const response = await fetch(scriptURL, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: { "Content-Type": "application/json" }
+        });
+        const text = await response.text();
+        document.getElementById("mensaje").innerText = "✅ Datos guardados correctamente.";
+      } catch (error) {
+        console.error(error);
+        document.getElementById("mensaje").innerText = "❌ Error al conectar con Sheets.";
+      }
+    }
+  </script>
 </body>
 </html>
