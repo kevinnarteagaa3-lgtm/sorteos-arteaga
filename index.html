@@ -9,80 +9,73 @@
     font-family: Arial, sans-serif;
     background-color: #000;
     color: #FFD700;
-    margin: 0;
-    padding: 0;
     text-align: center;
+    margin: 0;
   }
   header {
     background-color: #111;
-    padding: 20px;
+    padding: 15px;
   }
-  header img {
-    max-width: 150px;
+  img.logo {
+    max-width: 120px;
     border-radius: 10px;
   }
-  h1 {
-    margin: 10px 0;
-    color: #FFD700;
-  }
   .carrusel {
-    display: flex;
-    overflow: hidden;
-    width: 100%;
+    position: relative;
+    max-width: 100%;
     height: 200px;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
+    overflow: hidden;
+    margin: 15px 0;
   }
   .carrusel img {
     width: 100%;
-    max-width: 400px;
-    border-radius: 10px;
+    height: 200px;
+    object-fit: cover;
+    display: none;
   }
-  .descripcion, .pagos, .redes, .whatsapp {
-    background-color: #111;
-    margin: 20px auto;
-    padding: 15px;
+  .activo {
+    display: block !important;
+  }
+  .descripcion, .pagos, .redes {
+    margin: 10px auto;
+    width: 90%;
+    background: #111;
     border-radius: 10px;
-    max-width: 600px;
+    padding: 10px;
   }
   .boletos {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    max-width: 800px;
-    margin: 20px auto;
+    margin-top: 15px;
   }
   .boleto {
     width: 50px;
     height: 50px;
     margin: 5px;
-    border-radius: 5px;
+    background-color: #fff;
+    color: #000;
+    font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
+    border-radius: 8px;
     cursor: pointer;
   }
-  .disponible { background-color: #fff; color: #000; }
-  .vendido { background-color: #333; color: #999; }
-  .apartado { background-color: orange; color: #000; }
-  .maquinita {
-    margin: 30px auto;
-    background-color: #111;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 600px;
+  .vendido {
+    background-color: #222;
+    color: #FFD700;
+    cursor: not-allowed;
   }
   button {
     background-color: #FFD700;
     color: #000;
-    border: none;
-    padding: 10px 20px;
     font-weight: bold;
+    border: none;
+    padding: 8px 15px;
     border-radius: 5px;
-    margin-top: 10px;
     cursor: pointer;
+    margin-top: 10px;
   }
   button:hover {
     background-color: #FFC300;
@@ -90,10 +83,8 @@
 </style>
 </head>
 <body>
-
 <header>
-  <img id="logo" src="" alt="Logo Sorteos Arteaga">
-  <h1>Sorteos Arteaga</h1>
+  <img id="logo" class="logo" src="" alt="Logo Sorteos Arteaga">
 </header>
 
 <div class="carrusel" id="carrusel"></div>
@@ -101,92 +92,80 @@
 <div class="descripcion" id="descripcion"></div>
 <div class="pagos" id="pagos"></div>
 <div class="redes" id="redes"></div>
-<div class="whatsapp" id="whatsapp"></div>
 
-<div class="maquinita">
-  <h2>🎰 Maquinita de la Suerte</h2>
-  <p>Genera números aleatorios del 1 al total de emisiones</p>
-  <input type="number" id="cantidad" min="1" max="100" placeholder="Cantidad de boletos">
-  <button onclick="generarBoletos()">Generar</button>
-  <div id="numeros"></div>
-  <button onclick="apartarlos()">Apartar</button>
-</div>
-
+<h2>Selecciona tu número</h2>
 <div class="boletos" id="boletos"></div>
 
 <script>
 const scriptURL = "https://script.google.com/macros/s/AKfycbwhRb4ZuTHg5s7wEVqHLN6vwtcnHO0RPidtaZEqwXxN3__X1taodHGYUNdlqsp8PqEGCw/exec";
-let datos = {};
-let boletosSeleccionados = [];
 
 async function cargarDatos() {
   try {
     const res = await fetch(scriptURL);
-    const json = await res.json();
-    datos = json[json.length - 1];
+    const data = await res.json();
+    const ult = data[data.length - 1];
 
-    if (datos.logo) document.getElementById("logo").src = datos.logo;
-    if (datos.fotos && datos.fotos.length) mostrarCarrusel(datos.fotos);
-    if (datos.descripcion) document.getElementById("descripcion").innerText = datos.descripcion;
-    if (datos.pagos) document.getElementById("pagos").innerHTML = "<b>Métodos de pago:</b><br>" + datos.pagos;
-    if (datos.redes) document.getElementById("redes").innerHTML = "<b>Redes sociales:</b><br>" + datos.redes;
-    if (datos.whatsapp) document.getElementById("whatsapp").innerHTML = "<b>WhatsApp:</b><br>" + datos.whatsapp;
-    if (datos.emisiones) generarLista(parseInt(datos.emisiones));
-  } catch (e) {
-    console.error(e);
+    // Mostrar logo
+    if (ult.logo) document.getElementById("logo").src = ult.logo;
+
+    // Mostrar descripción, pagos y redes
+    document.getElementById("descripcion").innerHTML = `<h3>Descripción</h3><p>${ult.descripcion || ''}</p>`;
+    document.getElementById("pagos").innerHTML = `<h3>Métodos de Pago</h3><p>${ult.pagos || ''}</p>`;
+    document.getElementById("redes").innerHTML = `<h3>Redes Sociales</h3><p>${ult.redes || ''}</p>`;
+
+    // Carrusel
+    const carrusel = document.getElementById("carrusel");
+    carrusel.innerHTML = "";
+    if (ult.fotos && ult.fotos.length > 0) {
+      ult.fotos.forEach((foto, i) => {
+        const img = document.createElement("img");
+        img.src = foto;
+        if (i === 0) img.classList.add("activo");
+        carrusel.appendChild(img);
+      });
+      iniciarCarrusel();
+    }
+
+    // Crear boletos
+    const total = parseInt(ult.emisiones) || 0;
+    const vendidos = ult.vendidos ? ult.vendidos.split(",").map(v => v.trim()) : [];
+    const boletosDiv = document.getElementById("boletos");
+    boletosDiv.innerHTML = "";
+
+    for (let i = 1; i <= total; i++) {
+      const b = document.createElement("div");
+      b.classList.add("boleto");
+      b.textContent = i;
+      if (vendidos.includes(i.toString())) {
+        b.classList.add("vendido");
+      } else {
+        b.onclick = () => apartarNumero(i, ult.whatsapp);
+      }
+      boletosDiv.appendChild(b);
+    }
+
+  } catch (err) {
+    console.error(err);
   }
 }
 
-function mostrarCarrusel(fotos) {
-  let carrusel = document.getElementById("carrusel");
-  let i = 0;
-  carrusel.innerHTML = `<img src="${fotos[0]}">`;
+function iniciarCarrusel() {
+  let index = 0;
+  const imgs = document.querySelectorAll("#carrusel img");
   setInterval(() => {
-    i = (i + 1) % fotos.length;
-    carrusel.innerHTML = `<img src="${fotos[i]}">`;
+    imgs.forEach(img => img.classList.remove("activo"));
+    index = (index + 1) % imgs.length;
+    imgs[index].classList.add("activo");
   }, 3000);
 }
 
-function generarLista(total) {
-  const cont = document.getElementById("boletos");
-  cont.innerHTML = "";
-  for (let i = 1; i <= total; i++) {
-    let div = document.createElement("div");
-    div.className = "boleto disponible";
-    div.innerText = i;
-    div.onclick = () => seleccionar(div);
-    cont.appendChild(div);
-  }
-}
-
-function seleccionar(boleto) {
-  if (boleto.classList.contains("disponible")) {
-    boleto.classList.replace("disponible", "apartado");
-    boletosSeleccionados.push(boleto.innerText);
-  } else if (boleto.classList.contains("apartado")) {
-    boleto.classList.replace("apartado", "disponible");
-    boletosSeleccionados = boletosSeleccionados.filter(n => n !== boleto.innerText);
-  }
-}
-
-function generarBoletos() {
-  const cantidad = parseInt(document.getElementById("cantidad").value);
-  const total = parseInt(datos.emisiones);
-  const aleatorios = [];
-  for (let i = 0; i < cantidad; i++) {
-    aleatorios.push(Math.floor(Math.random() * total) + 1);
-  }
-  document.getElementById("numeros").innerText = "Números generados: " + aleatorios.join(", ");
-  boletosSeleccionados = aleatorios.map(n => n.toString());
-}
-
-function apartarlos() {
-  const nombre = prompt("Ingresa tu nombre completo:");
-  const estado = prompt("Selecciona tu estado (Ej. Jalisco, CDMX, Puebla):");
-  const telefono = prompt("Ingresa tu número de teléfono:");
-  const mensaje = `Hola! Soy ${nombre} de ${estado}. Quiero apartar los boletos: ${boletosSeleccionados.join(", ")}. Mi número es ${telefono}.`;
-  const numeroWhats = datos.whatsapp.replace(/\D/g, "");
-  window.open(`https://wa.me/${numeroWhats}?text=${encodeURIComponent(mensaje)}`);
+function apartarNumero(numero, whatsapp) {
+  const nombre = prompt("Escribe tu nombre completo:");
+  const tel = prompt("Escribe tu número de teléfono:");
+  const estado = prompt("Selecciona tu estado:");
+  const mensaje = `Hola, quiero apartar el número ${numero} en Sorteos Arteaga.\nNombre: ${nombre}\nTeléfono: ${tel}\nEstado: ${estado}`;
+  const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(mensaje)}`;
+  window.open(url, "_blank");
 }
 
 cargarDatos();
