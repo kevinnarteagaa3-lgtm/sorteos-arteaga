@@ -1,121 +1,102 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sorteos Arteaga</title>
-  <style>
-    body {
-      background-color: #000;
-      color: #ffcc00;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #111;
-      padding: 10px;
-    }
-    img.logo {
-      width: 120px;
-      height: auto;
-      margin: 10px auto;
-      display: block;
-    }
-    .descripcion {
-      margin: 20px;
-    }
-    .carrusel img {
-      width: 90%;
-      max-width: 400px;
-      border-radius: 10px;
-      margin: 5px;
-    }
-    .numeros {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin: 20px;
-    }
-    .numero {
-      width: 60px;
-      height: 60px;
-      margin: 5px;
-      line-height: 60px;
-      border-radius: 50%;
-      background-color: white;
-      color: black;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .numero.vendido {
-      background-color: #333;
-      color: #ffcc00;
-      cursor: not-allowed;
-    }
-    .boton-apartar {
-      background-color: #ffcc00;
-      color: #000;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-      margin-top: 10px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorteos Arteaga</title>
+<style>
+  body { background-color: #111; color: #FFD700; font-family: Arial; text-align: center; }
+  h1 { background: #222; padding: 15px; margin: 0; }
+  .logo img { width: 120px; margin: 10px auto; display: block; border-radius: 10px; }
+  .carrusel img { width: 90%; border-radius: 10px; margin: 10px auto; display: block; }
+  .boletos { display: flex; flex-wrap: wrap; justify-content: center; margin: 20px; }
+  .boleto {
+    width: 50px; height: 50px; margin: 5px;
+    display: flex; justify-content: center; align-items: center;
+    background: white; color: black; border-radius: 5px; cursor: pointer; font-weight: bold;
+  }
+  .boleto.vendido { background: #000; color: #FFD700; cursor: not-allowed; }
+  .apartado { margin-top: 20px; }
+  button {
+    background: #FFD700; color: black; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;
+  }
+</style>
 </head>
 <body>
+<h1>Sorteos Arteaga</h1>
+<div class="logo" id="logo"></div>
+<div class="carrusel" id="carrusel"></div>
+<h2 id="titulo"></h2>
+<p id="descripcion"></p>
+<div class="boletos" id="boletos"></div>
 
-  <header>
-    <img id="logo" class="logo" src="" alt="Logo Sorteos Arteaga">
-    <h1>Sorteos Arteaga</h1>
-  </header>
+<div class="apartado">
+  <p>Selecciona tu número y aparta por WhatsApp</p>
+  <input type="text" id="nombre" placeholder="Tu nombre"><br>
+  <input type="text" id="estado" placeholder="Tu estado"><br>
+  <input type="text" id="telefono" placeholder="Tu número"><br>
+  <button onclick="enviarApartado()">Enviar Apartado</button>
+</div>
 
-  <div class="descripcion" id="descripcion"></div>
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby15HGaszE46gUdR6H9GRV66NO1e_XO7lyiBN_LnEeLLK6zxFm_FkGSEo4kfxNelDxjhw/exec";
+let datos = {};
+let seleccionados = [];
 
-  <div class="carrusel" id="carrusel"></div>
+async function cargar() {
+  const res = await fetch(SCRIPT_URL);
+  const json = await res.json();
+  if (!json.length) return;
+  datos = json[0];
 
-  <h2>Selecciona tu número</h2>
-  <div class="numeros" id="numeros"></div>
+  // Mostrar logo
+  if (datos.imagenLogo) document.getElementById('logo').innerHTML = `<img src="${datos.imagenLogo}">`;
 
-  <script>
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbxqkOljKP_RbvgLfI8hQga4qcpNsMN-qhbZzpTX-JHKUs-0F_Eidzg9D_FfhZayaddsvw/exec";
-    const WHATSAPP_NUM = "525635088487"; // tu número con lada internacional
+  // Carrusel
+  if (datos.imagenesCarrusel) {
+    const fotos = datos.imagenesCarrusel.split('|');
+    let i = 0;
+    const img = document.createElement('img');
+    img.src = fotos[0];
+    document.getElementById('carrusel').appendChild(img);
+    setInterval(() => {
+      i = (i + 1) % fotos.length;
+      img.src = fotos[i];
+    }, 2500);
+  }
 
-    fetch(SHEET_URL)
-      .then(res => res.json())
-      .then(data => {
-        const datos = data[0];
-        document.getElementById("descripcion").innerText = datos.descripcion || "";
-        document.getElementById("logo").src = datos.logo || "";
-        document.getElementById("carrusel").innerHTML = (datos.imagenes || []).map(f => `<img src="${f}">`).join("");
+  document.getElementById('titulo').innerText = datos.titulo;
+  document.getElementById('descripcion').innerText = datos.descripcion;
 
-        const total = parseInt(datos.emisiones) || 100;
-        const vendidos = datos.vendidos ? datos.vendidos.split(",").map(n => parseInt(n)) : [];
-        const contenedor = document.getElementById("numeros");
-        for (let i = 1; i <= total; i++) {
-          const div = document.createElement("div");
-          div.className = "numero" + (vendidos.includes(i) ? " vendido" : "");
-          div.innerText = i;
-          if (!vendidos.includes(i)) {
-            div.onclick = () => {
-              const nombre = prompt("Tu nombre:");
-              const estado = prompt("Tu estado:");
-              const mensaje = `Hola! Quiero apartar el número ${i}.\nNombre: ${nombre}\nEstado: ${estado}`;
-              window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(mensaje)}`);
-            };
-          }
-          contenedor.appendChild(div);
-        }
-      })
-      .catch(err => {
-        console.error("Error al cargar datos:", err);
-        document.body.innerHTML += "<p>Error al conectar con datos del sorteo.</p>";
-      });
-  </script>
+  // Boletos
+  const total = parseInt(datos.emisiones || 0);
+  const vendidos = datos.boletosVendidos ? datos.boletosVendidos.split(',').map(n => n.trim()) : [];
+  const cont = document.getElementById('boletos');
+  cont.innerHTML = '';
+  for (let i = 1; i <= total; i++) {
+    const b = document.createElement('div');
+    b.className = 'boleto' + (vendidos.includes(i.toString()) ? ' vendido' : '');
+    b.innerText = i;
+    if (!vendidos.includes(i.toString())) {
+      b.onclick = () => {
+        if (!seleccionados.includes(i)) seleccionados.push(i);
+        b.style.background = '#FFD700';
+        b.style.color = '#000';
+      };
+    }
+    cont.appendChild(b);
+  }
+}
+cargar();
+
+function enviarApartado() {
+  if (!seleccionados.length) return alert("Selecciona al menos un número");
+  const nombre = document.getElementById('nombre').value;
+  const estado = document.getElementById('estado').value;
+  const telefono = document.getElementById('telefono').value;
+  const mensaje = `Hola! Soy ${nombre} de ${estado}. Quiero apartar los números: ${seleccionados.join(', ')}. Mi número es ${telefono}.`;
+  window.open(`https://wa.me/${datos.whatsApp.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`, '_blank');
+}
+</script>
 </body>
 </html>
