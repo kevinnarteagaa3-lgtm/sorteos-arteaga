@@ -1,78 +1,227 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sorteos Arteaga</title>
-  <style>
-    body { background: #121212; color: #FFD700; font-family: Arial; text-align: center; margin: 0; }
-    header { background: #1f1f1f; padding: 15px; }
-    header img { width: 120px; border-radius: 10px; }
-    .numeros { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px; padding: 20px; }
-    .numero { background: white; color: black; font-weight: bold; padding: 10px; border-radius: 5px; cursor: pointer; }
-    .numero.vendido { background: #333; color: #aaa; cursor: not-allowed; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorteos Arteaga</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #f1c40f;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+  header {
+    padding: 20px;
+  }
+  #logo {
+    max-width: 180px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+  }
+  #carousel {
+    display: flex;
+    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+    height: 220px;
+  }
+  #carousel img {
+    max-height: 200px;
+    border-radius: 10px;
+    display: none;
+  }
+  #carousel img.active {
+    display: block;
+  }
+  #descripcion {
+    margin: 20px auto;
+    width: 90%;
+    background: #1a1a1a;
+    border-radius: 10px;
+    padding: 15px;
+  }
+  #boletos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 15px;
+  }
+  .boleto {
+    width: 50px;
+    height: 50px;
+    margin: 5px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .vendido {
+    background-color: #333;
+    color: #888;
+    cursor: not-allowed;
+  }
+  .seleccionado {
+    background-color: #f1c40f;
+    color: #000;
+  }
+  #apartado {
+    margin-top: 20px;
+  }
+  input, select, button {
+    padding: 10px;
+    margin: 8px;
+    border-radius: 5px;
+    border: none;
+    font-size: 15px;
+  }
+  button {
+    background-color: #f1c40f;
+    color: #000;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  button:hover {
+    background-color: #ffcc00;
+  }
+  footer {
+    background-color: #111;
+    padding: 20px;
+    font-size: 14px;
+  }
+</style>
 </head>
 <body>
-  <header>
-    <img id="logo" src="">
-    <h1 id="titulo">Sorteos Arteaga</h1>
-  </header>
+<header>
+  <img id="logo" src="" alt="Logo Sorteos Arteaga">
+  <h1>🎟️ Participa y gana con <b>Sorteos Arteaga</b></h1>
+</header>
 
-  <p id="descripcion"></p>
+<div id="carousel"></div>
 
-  <div id="numeros" class="numeros"></div>
+<div id="descripcion"></div>
 
-  <script>
-    const SHEETS_URL = "https://script.google.com/macros/s/AKfycbym6UJ3Jt3NIZ9vr1Grg0K0FNIvPZzT0eBI3Rlt84HZp5K10w8yniTBzMopEoi2ATeF/exec";
-    const WHATSAPP = "525635088487";
+<div id="boletos"></div>
 
-    async function cargar() {
-      const res = await fetch(SHEETS_URL);
-      const datos = await res.json();
-      if (!datos.length) return;
+<div id="apartado">
+  <h3>📋 Apartar tus boletos</h3>
+  <input type="text" id="nombre" placeholder="Tu nombre">
+  <input type="text" id="telefono" placeholder="Tu número de teléfono">
+  <select id="estado">
+    <option value="">Selecciona tu estado</option>
+    <option>Aguascalientes</option><option>Baja California</option><option>Baja California Sur</option>
+    <option>Campeche</option><option>Chiapas</option><option>Chihuahua</option><option>Ciudad de México</option>
+    <option>Coahuila</option><option>Colima</option><option>Durango</option><option>Estado de México</option>
+    <option>Guanajuato</option><option>Guerrero</option><option>Hidalgo</option><option>Jalisco</option>
+    <option>Michoacán</option><option>Morelos</option><option>Nayarit</option><option>Nuevo León</option>
+    <option>Oaxaca</option><option>Puebla</option><option>Querétaro</option><option>Quintana Roo</option>
+    <option>San Luis Potosí</option><option>Sinaloa</option><option>Sonora</option><option>Tabasco</option>
+    <option>Tamaulipas</option><option>Tlaxcala</option><option>Veracruz</option><option>Yucatán</option>
+    <option>Zacatecas</option>
+  </select>
+  <button onclick="enviarWhatsApp()">📲 Enviar apartado</button>
+</div>
 
-      const d = datos[datos.length - 1];
-      document.getElementById("titulo").innerText = d.titulo || "Sorteos Arteaga";
-      document.getElementById("descripcion").innerText = d.descripcion || "";
-      if (d.logo) document.getElementById("logo").src = d.logo;
+<footer>
+  <p id="pagos"></p>
+  <p id="redes"></p>
+  <p>© 2025 Sorteos Arteaga - Todos los derechos reservados</p>
+</footer>
 
-      const total = parseInt(d.emisiones) || 50;
-      const apartados = JSON.parse(d.apartados || "[]");
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycby-atfTTEvyN2LhhFnjlngvGOnfXYtqfIhEZbqWJjZ06Y9-MGmTDmzvqnYVLcDUK-bbIw/exec";
 
-      const contenedor = document.getElementById("numeros");
-      contenedor.innerHTML = "";
+let datos = {};
+let seleccionados = [];
 
-      for (let i = 1; i <= total; i++) {
-        const div = document.createElement("div");
-        div.innerText = i;
-        div.className = "numero" + (apartados.includes(i) ? " vendido" : "");
-        if (!apartados.includes(i)) {
-          div.onclick = () => apartar(i);
-        }
-        contenedor.appendChild(div);
-      }
-    }
+async function cargarDatos() {
+  try {
+    const res = await fetch(scriptURL);
+    datos = await res.json();
 
-    async function apartar(num) {
-      const nombre = prompt("Tu nombre:");
-      const telefono = prompt("Tu número:");
-      const estado = prompt("Tu estado:");
-      if (!nombre || !telefono || !estado) return;
+    document.getElementById("descripcion").innerText = datos.descripcion || "";
+    document.getElementById("pagos").innerText = "💳 Métodos de pago: " + (datos.metodosPago || "");
+    document.getElementById("redes").innerText = "🌐 Redes sociales: " + (datos.redes || "");
 
-      const mensaje = `Hola! Quiero apartar el número ${num}.\nNombre: ${nombre}\nTeléfono: ${telefono}\nEstado: ${estado}`;
-      window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensaje)}`, "_blank");
+    if (datos.logo) document.getElementById("logo").src = datos.logo;
 
-      await fetch(SHEETS_URL, {
-        method: "POST",
-        body: JSON.stringify({ tipo: "actualizarApartado", numero: num }),
-        headers: { "Content-Type": "application/json" }
+    // Carrusel
+    const carruselDiv = document.getElementById("carousel");
+    carruselDiv.innerHTML = "";
+    if (datos.carrusel && datos.carrusel.length > 0) {
+      datos.carrusel.forEach((img, i) => {
+        const im = document.createElement("img");
+        im.src = img;
+        if (i === 0) im.classList.add("active");
+        carruselDiv.appendChild(im);
       });
-
-      cargar(); // refresca lista
+      let i = 0;
+      setInterval(() => {
+        const imgs = document.querySelectorAll("#carousel img");
+        imgs.forEach(img => img.classList.remove("active"));
+        imgs[i % imgs.length].classList.add("active");
+        i++;
+      }, 3000);
     }
 
-    cargar();
-  </script>
+    // Generar boletos
+    generarBoletos(datos.emisiones || 0, datos.vendidos || "");
+  } catch (e) {
+    document.body.innerHTML = "<h2>Error al cargar los datos del sorteo.</h2>";
+  }
+}
+
+function generarBoletos(total, vendidos) {
+  const contenedor = document.getElementById("boletos");
+  contenedor.innerHTML = "";
+  const vendidosArr = vendidos.split(",").map(v => v.trim());
+  for (let i = 1; i <= total; i++) {
+    const btn = document.createElement("div");
+    btn.classList.add("boleto");
+    btn.textContent = i;
+    if (vendidosArr.includes(i.toString())) {
+      btn.classList.add("vendido");
+    } else {
+      btn.onclick = () => toggleSeleccion(i, btn);
+    }
+    contenedor.appendChild(btn);
+  }
+}
+
+function toggleSeleccion(num, el) {
+  if (seleccionados.includes(num)) {
+    seleccionados = seleccionados.filter(n => n !== num);
+    el.classList.remove("seleccionado");
+  } else {
+    seleccionados.push(num);
+    el.classList.add("seleccionado");
+  }
+}
+
+function enviarWhatsApp() {
+  const nombre = document.getElementById("nombre").value;
+  const telefono = document.getElementById("telefono").value;
+  const estado = document.getElementById("estado").value;
+  const boletos = seleccionados.join(", ");
+  const numeroWhatsApp = datos.whatsapp || "525635088487";
+
+  if (!nombre || !telefono || !estado || seleccionados.length === 0) {
+    alert("Por favor completa todos los campos y selecciona boletos.");
+    return;
+  }
+
+  const mensaje = `Hola! Soy ${nombre} del estado ${estado}. Quiero apartar los boletos: ${boletos}. Mi número es ${telefono}.`;
+  const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+  window.open(url, "_blank");
+}
+
+cargarDatos();
+</script>
 </body>
 </html>
