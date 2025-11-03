@@ -1,143 +1,102 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel de Administración - Sorteos Arteaga</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Panel Sorteos Arteaga</title>
 <style>
-  body {
-    background-color: #111;
-    color: #ffcc00;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 20px;
-  }
-  h1 { color: #ffcc00; }
-  label { display: block; margin-top: 15px; font-weight: bold; }
-  input, textarea, button, select {
-    width: 90%;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 5px;
-    border: none;
-  }
-  button {
-    background-color: #ffcc00;
-    color: #111;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  button:hover { background-color: #ffaa00; }
-  .preview {
-    margin-top: 10px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .preview img {
-    width: 100px;
-    height: 100px;
-    margin: 5px;
-    border-radius: 10px;
-    object-fit: cover;
-  }
+body {
+  background-color: #111;
+  color: #FFD700;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+input, textarea {
+  width: 80%;
+  margin: 5px;
+  padding: 8px;
+  border: 1px solid #FFD700;
+  border-radius: 5px;
+  background: #222;
+  color: #FFD700;
+}
+button {
+  background-color: orange;
+  border: none;
+  padding: 10px 20px;
+  color: #111;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+button:hover { background: #FFD700; }
 </style>
 </head>
 <body>
+<h1>⚙️ Panel de Administración ⚙️</h1>
 
-<h1>Panel de Administración</h1>
+<input type="text" id="titulo" placeholder="Título de la rifa" /><br>
+<textarea id="descripcion" rows="4" placeholder="Descripción de la rifa"></textarea><br>
+<input type="file" id="imagen" accept="image/*"><br>
+<input type="text" id="emisiones" placeholder="Número de emisiones"><br>
+<input type="text" id="redes" placeholder="Redes sociales (Facebook, Instagram)"><br>
+<input type="text" id="pagos" placeholder="Métodos de pago (Oxxo, tarjeta, etc.)"><br>
+<input type="text" id="whatsapp" placeholder="Número de WhatsApp"><br>
+<input type="file" id="logo" accept="image/*"><br>
+<button onclick="guardar()">Guardar cambios</button>
 
-<label>Logo del sitio:</label>
-<input type="file" id="logoInput" accept="image/*">
-<div class="preview" id="logoPreview"></div>
-
-<label>Fotos de la página (carrusel):</label>
-<input type="file" id="fotosInput" accept="image/*" multiple>
-<div class="preview" id="fotosPreview"></div>
-
-<label>Descripción:</label>
-<textarea id="descripcion" rows="3"></textarea>
-
-<label>Número de emisiones:</label>
-<input type="number" id="emisiones" placeholder="Ejemplo: 100">
-
-<label>Métodos de pago:</label>
-<textarea id="pagos" rows="2" placeholder="Ejemplo: Tarjeta, OXXO, Transferencia..."></textarea>
-
-<label>Números de WhatsApp (hasta 3):</label>
-<input type="text" id="whatsapp1" placeholder="+52 5635088487">
-<input type="text" id="whatsapp2" placeholder="Opcional">
-<input type="text" id="whatsapp3" placeholder="Opcional">
-
-<label>Redes sociales:</label>
-<input type="text" id="facebook" placeholder="Facebook">
-<input type="text" id="instagram" placeholder="Instagram">
-<input type="text" id="tiktok" placeholder="TikTok">
-
-<label>Boletos vendidos (separa con comas):</label>
-<textarea id="boletosVendidos" rows="3" placeholder="Ejemplo: 1,5,10,23..."></textarea>
-
-<button onclick="guardarDatos()">💾 Guardar Cambios</button>
-
-<p id="mensaje"></p>
+<p id="estado"></p>
 
 <script>
-const scriptURL = "https://script.google.com/macros/s/AKfycbxtK3de3r3txVgVCpQm4bmAjbt4wZXdmQ-RRv61hx24J0l4MIepyJo0pg6JjlOtKMsk/exec";
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycbym6UJ3Jt3NIZ9vr1Grg0K0FNIvPZzT0eBI3Rlt84HZp5K10w8yniTBzMopEoi2ATeF/exec";
 
-function previsualizar(input, previewId) {
-  const preview = document.getElementById(previewId);
-  preview.innerHTML = "";
-  for (const file of input.files) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = document.createElement("img");
-      img.src = e.target.result;
-      preview.appendChild(img);
-    };
-    reader.readAsDataURL(file);
-  }
+async function convertirImagenABase64(archivo) {
+  return new Promise((resolve, reject) => {
+    const lector = new FileReader();
+    lector.onload = () => resolve(lector.result);
+    lector.onerror = reject;
+    lector.readAsDataURL(archivo);
+  });
 }
 
-document.getElementById('logoInput').addEventListener('change', e => previsualizar(e.target, 'logoPreview'));
-document.getElementById('fotosInput').addEventListener('change', e => previsualizar(e.target, 'fotosPreview'));
-
-async function guardarDatos() {
-  const logo = document.querySelector('#logoPreview img')?.src || "";
-  const fotos = [...document.querySelectorAll('#fotosPreview img')].map(img => img.src);
-  const descripcion = document.getElementById('descripcion').value;
-  const emisiones = document.getElementById('emisiones').value;
-  const pagos = document.getElementById('pagos').value;
-  const whatsapp = [
-    document.getElementById('whatsapp1').value,
-    document.getElementById('whatsapp2').value,
-    document.getElementById('whatsapp3').value
-  ].filter(x => x);
-  const redes = {
-    facebook: document.getElementById('facebook').value,
-    instagram: document.getElementById('instagram').value,
-    tiktok: document.getElementById('tiktok').value
-  };
-  const boletosVendidos = document.getElementById('boletosVendidos').value.split(',').map(n => n.trim());
-
-  const datos = {
-    logo, fotos, descripcion, emisiones, pagos, whatsapp, redes, boletosVendidos
-  };
-
-  document.getElementById('mensaje').innerText = "Guardando...";
+async function guardar() {
+  const estado = document.getElementById("estado");
+  estado.textContent = "Guardando...";
   
+  const titulo = document.getElementById("titulo").value;
+  const descripcion = document.getElementById("descripcion").value;
+  const emisiones = document.getElementById("emisiones").value;
+  const redes = document.getElementById("redes").value;
+  const pagos = document.getElementById("pagos").value;
+  const whatsapp = document.getElementById("whatsapp").value;
+
+  const imagenArchivo = document.getElementById("imagen").files[0];
+  const logoArchivo = document.getElementById("logo").files[0];
+  
+  let imagenBase64 = "";
+  let logoBase64 = "";
+
+  if (imagenArchivo) imagenBase64 = await convertirImagenABase64(imagenArchivo);
+  if (logoArchivo) logoBase64 = await convertirImagenABase64(logoArchivo);
+
+  const data = {
+    titulo, descripcion, imagen: imagenBase64,
+    emisiones, redes, pagos, whatsapp, logo: logoBase64
+  };
+
   try {
-    const respuesta = await fetch(scriptURL, {
+    await fetch(SHEETS_URL, {
       method: "POST",
-      body: JSON.stringify(datos),
+      body: JSON.stringify(data),
       headers: { "Content-Type": "application/json" }
     });
-    const texto = await respuesta.text();
-    document.getElementById('mensaje').innerText = "✅ Datos guardados correctamente.";
-  } catch (e) {
-    document.getElementById('mensaje').innerText = "❌ No se pudo conectar con Sheets.";
+    estado.textContent = "✅ Cambios guardados correctamente.";
+  } catch (err) {
+    console.error(err);
+    estado.textContent = "❌ No se pudo conectar con Sheets.";
   }
 }
 </script>
-
 </body>
 </html>
