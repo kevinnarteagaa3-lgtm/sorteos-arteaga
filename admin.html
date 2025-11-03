@@ -1,99 +1,132 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Administración - Sorteos Arteaga</title>
-  <style>
-    body {
-      background-color: #000;
-      color: #ffcc00;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 20px;
-    }
-    input, textarea, button {
-      display: block;
-      margin: 10px auto;
-      padding: 8px;
-      width: 80%;
-      border-radius: 5px;
-      border: none;
-      font-size: 16px;
-    }
-    button {
-      background-color: #ffcc00;
-      color: #000;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Sorteos Arteaga</title>
+<style>
+  body {
+    background-color: #111;
+    color: #FFD700;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    background: #222;
+    padding: 15px;
+    margin: 0;
+  }
+  input, textarea {
+    width: 90%;
+    margin: 8px;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    font-size: 15px;
+  }
+  label { display: block; margin-top: 10px; }
+  button {
+    background: #FFD700;
+    color: black;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 10px;
+  }
+  button:hover { background: #ffcc00; }
+</style>
 </head>
 <body>
-  <h1>Panel de Administración</h1>
+<h1>Panel de Administración - Sorteos Arteaga</h1>
 
-  <label>Descripción del sorteo:</label>
-  <textarea id="descripcion"></textarea>
+<form id="adminForm">
+  <label>Título:</label>
+  <input type="text" id="titulo" placeholder="Título del sorteo">
 
-  <label>Logo (selecciona una imagen):</label>
-  <input type="file" id="logo" accept="image/*">
+  <label>Descripción:</label>
+  <textarea id="descripcion" rows="3" placeholder="Descripción del sorteo"></textarea>
 
-  <label>Fotos del carrusel (puedes subir varias):</label>
-  <input type="file" id="imagenes" multiple accept="image/*">
+  <label>Logo (seleccionar desde dispositivo):</label>
+  <input type="file" id="logoInput" accept="image/*">
+
+  <label>Fotos del Carrusel (seleccionar varias):</label>
+  <input type="file" id="carruselInput" accept="image/*" multiple>
 
   <label>Número de emisiones:</label>
-  <input type="number" id="emisiones" min="1" value="100">
+  <input type="number" id="emisiones" placeholder="Ej. 100">
 
-  <label>Números vendidos (separados por coma):</label>
-  <input type="text" id="vendidos" placeholder="Ej: 3,15,27">
+  <label>Número de WhatsApp (con +52):</label>
+  <input type="text" id="whatsApp" placeholder="+52 5635088487">
 
-  <button id="guardar">Guardar configuración</button>
+  <label>Métodos de pago:</label>
+  <textarea id="metodosPago" rows="2" placeholder="Ej. Transferencia, OXXO, etc."></textarea>
 
-  <p id="mensaje"></p>
+  <label>Redes sociales:</label>
+  <textarea id="redes" rows="2" placeholder="Ej. Facebook, Instagram"></textarea>
 
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqkOljKP_RbvgLfI8hQga4qcpNsMN-qhbZzpTX-JHKUs-0F_Eidzg9D_FfhZayaddsvw/exec";
+  <label>Boletos vendidos (separados por coma):</label>
+  <input type="text" id="boletosVendidos" placeholder="Ej. 3, 7, 15, 22">
 
-    document.getElementById("guardar").onclick = async () => {
-      const descripcion = document.getElementById("descripcion").value;
-      const emisiones = document.getElementById("emisiones").value;
-      const vendidos = document.getElementById("vendidos").value;
-      
-      const logoFile = document.getElementById("logo").files[0];
-      const imagenFiles = document.getElementById("imagenes").files;
+  <button type="button" onclick="guardar()">Guardar Configuración</button>
+</form>
 
-      const toBase64 = file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-      });
+<p id="status"></p>
 
-      const logo64 = logoFile ? await toBase64(logoFile) : "";
-      const imagenes64 = [];
-      for (const f of imagenFiles) imagenes64.push(await toBase64(f));
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby15HGaszE46gUdR6H9GRV66NO1e_XO7lyiBN_LnEeLLK6zxFm_FkGSEo4kfxNelDxjhw/exec";
 
-      const body = {
-        descripcion,
-        emisiones,
-        vendidos,
-        logo: logo64,
-        imagenes: imagenes64
-      };
+async function guardar() {
+  document.getElementById('status').innerText = "Guardando...";
+  
+  // Subir imágenes como Base64
+  const logoFile = document.getElementById('logoInput').files[0];
+  const carruselFiles = document.getElementById('carruselInput').files;
+  
+  let logoBase64 = "";
+  let carruselBase64 = [];
+  
+  if (logoFile) logoBase64 = await toBase64(logoFile);
+  for (let f of carruselFiles) carruselBase64.push(await toBase64(f));
 
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify(body)
-      })
-      .then(r => r.text())
-      .then(res => document.getElementById("mensaje").innerText = "Guardado correctamente.")
-      .catch(err => document.getElementById("mensaje").innerText = "Error al conectar con Sheets.");
-    };
-  </script>
+  const data = {
+    titulo: document.getElementById('titulo').value,
+    descripcion: document.getElementById('descripcion').value,
+    imagenLogo: logoBase64,
+    imagenesCarrusel: carruselBase64.join("|"),
+    emisiones: document.getElementById('emisiones').value,
+    whatsApp: document.getElementById('whatsApp').value,
+    metodosPago: document.getElementById('metodosPago').value,
+    redes: document.getElementById('redes').value,
+    boletosVendidos: document.getElementById('boletosVendidos').value
+  };
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const txt = await res.text();
+    document.getElementById('status').innerText = "✅ Configuración guardada correctamente";
+  } catch (err) {
+    document.getElementById('status').innerText = "❌ Error al conectar con Sheets";
+    console.error(err);
+  }
+}
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
+}
+</script>
 </body>
 </html>
