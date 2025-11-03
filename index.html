@@ -1,181 +1,121 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sorteos Arteaga - Rifas</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorteos Arteaga</title>
   <style>
     body {
-      background-color: #111;
-      color: #FFD700;
+      background-color: #000;
+      color: #ffcc00;
       font-family: Arial, sans-serif;
-      margin: 0;
       text-align: center;
+      margin: 0;
+      padding: 0;
     }
-
     header {
-      padding: 20px;
+      background-color: #111;
+      padding: 10px;
     }
-
-    header img {
+    img.logo {
       width: 120px;
-      border-radius: 10px;
+      height: auto;
+      margin: 10px auto;
+      display: block;
     }
-
-    h1 {
-      margin: 10px 0;
-    }
-
-    .carrusel {
-      display: flex;
-      overflow-x: auto;
-      gap: 10px;
-      justify-content: center;
+    .descripcion {
       margin: 20px;
     }
-
     .carrusel img {
-      width: 200px;
-      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 10px;
+      margin: 5px;
     }
-
     .numeros {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 10px;
-      margin: 30px;
+      margin: 20px;
     }
-
     .numero {
       width: 60px;
       height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
+      margin: 5px;
+      line-height: 60px;
+      border-radius: 50%;
       background-color: white;
       color: black;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
     }
-
     .numero.vendido {
-      background-color: black;
-      color: white;
+      background-color: #333;
+      color: #ffcc00;
       cursor: not-allowed;
     }
-
-    button {
-      background-color: #FFD700;
+    .boton-apartar {
+      background-color: #ffcc00;
       color: #000;
       border: none;
       padding: 10px 20px;
       font-size: 16px;
-      border-radius: 8px;
       cursor: pointer;
-      margin-top: 20px;
-    }
-
-    .apartado {
-      margin-top: 20px;
-    }
-
-    select, input {
-      padding: 10px;
-      margin: 5px;
       border-radius: 5px;
-      border: none;
-      font-size: 14px;
+      margin-top: 10px;
     }
-
   </style>
 </head>
 <body>
+
   <header>
-    <img id="logo" src="" alt="Logo Sorteos Arteaga">
-    <h1 id="titulo">Sorteos Arteaga</h1>
-    <p id="descripcion"></p>
+    <img id="logo" class="logo" src="" alt="Logo Sorteos Arteaga">
+    <h1>Sorteos Arteaga</h1>
   </header>
+
+  <div class="descripcion" id="descripcion"></div>
 
   <div class="carrusel" id="carrusel"></div>
 
+  <h2>Selecciona tu número</h2>
   <div class="numeros" id="numeros"></div>
 
-  <div class="apartado" id="apartado" style="display:none;">
-    <h3>💬 Apartar tus números</h3>
-    <p id="seleccionados"></p>
-    <input type="text" id="nombre" placeholder="Tu nombre">
-    <input type="text" id="telefono" placeholder="Tu número de WhatsApp">
-    <select id="estado">
-      <option value="">Selecciona tu estado</option>
-      <option>Aguascalientes</option><option>Baja California</option><option>Baja California Sur</option>
-      <option>Campeche</option><option>Chiapas</option><option>Chihuahua</option><option>Coahuila</option>
-      <option>Colima</option><option>Durango</option><option>Guanajuato</option><option>Guerrero</option>
-      <option>Hidalgo</option><option>Jalisco</option><option>Estado de México</option><option>Michoacán</option>
-      <option>Morelos</option><option>Nayarit</option><option>Nuevo León</option><option>Oaxaca</option>
-      <option>Puebla</option><option>Querétaro</option><option>Quintana Roo</option><option>San Luis Potosí</option>
-      <option>Sinaloa</option><option>Sonora</option><option>Tabasco</option><option>Tamaulipas</option>
-      <option>Tlaxcala</option><option>Veracruz</option><option>Yucatán</option><option>Zacatecas</option>
-      <option>CDMX</option>
-    </select><br>
-    <button onclick="enviarWhatsApp()">📲 Enviar apartado</button>
-  </div>
-
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxqkOljKP_RbvgLfI8hQga4qcpNsMN-qhbZzpTX-JHKUs-0F_Eidzg9D_FfhZayaddsvw/exec";
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbxqkOljKP_RbvgLfI8hQga4qcpNsMN-qhbZzpTX-JHKUs-0F_Eidzg9D_FfhZayaddsvw/exec";
+    const WHATSAPP_NUM = "525635088487"; // tu número con lada internacional
 
-    async function cargarDatos() {
-      const res = await fetch(scriptURL);
-      const data = await res.json();
+    fetch(SHEET_URL)
+      .then(res => res.json())
+      .then(data => {
+        const datos = data[0];
+        document.getElementById("descripcion").innerText = datos.descripcion || "";
+        document.getElementById("logo").src = datos.logo || "";
+        document.getElementById("carrusel").innerHTML = (datos.imagenes || []).map(f => `<img src="${f}">`).join("");
 
-      document.getElementById("titulo").innerText = data.titulo || "Sorteos Arteaga";
-      document.getElementById("descripcion").innerText = data.descripcion || "";
-      document.getElementById("logo").src = data.logo || "";
-
-      const carrusel = document.getElementById("carrusel");
-      carrusel.innerHTML = "";
-      if (data.fotos && data.fotos.length) {
-        data.fotos.forEach(url => {
-          const img = document.createElement("img");
-          img.src = url;
-          carrusel.appendChild(img);
-        });
-      }
-
-      const numerosContainer = document.getElementById("numeros");
-      numerosContainer.innerHTML = "";
-      for (let i = 1; i <= (data.emisiones || 50); i++) {
-        const div = document.createElement("div");
-        div.className = "numero" + (data.vendidos?.includes(i) ? " vendido" : "");
-        div.innerText = i;
-        if (!div.classList.contains("vendido")) {
-          div.onclick = () => seleccionarNumero(i);
+        const total = parseInt(datos.emisiones) || 100;
+        const vendidos = datos.vendidos ? datos.vendidos.split(",").map(n => parseInt(n)) : [];
+        const contenedor = document.getElementById("numeros");
+        for (let i = 1; i <= total; i++) {
+          const div = document.createElement("div");
+          div.className = "numero" + (vendidos.includes(i) ? " vendido" : "");
+          div.innerText = i;
+          if (!vendidos.includes(i)) {
+            div.onclick = () => {
+              const nombre = prompt("Tu nombre:");
+              const estado = prompt("Tu estado:");
+              const mensaje = `Hola! Quiero apartar el número ${i}.\nNombre: ${nombre}\nEstado: ${estado}`;
+              window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(mensaje)}`);
+            };
+          }
+          contenedor.appendChild(div);
         }
-        numerosContainer.appendChild(div);
-      }
-    }
-
-    const seleccionados = [];
-
-    function seleccionarNumero(num) {
-      if (!seleccionados.includes(num)) {
-        seleccionados.push(num);
-      }
-      document.getElementById("apartado").style.display = "block";
-      document.getElementById("seleccionados").innerText = "Números seleccionados: " + seleccionados.join(", ");
-    }
-
-    function enviarWhatsApp() {
-      const nombre = document.getElementById("nombre").value;
-      const telefono = document.getElementById("telefono").value;
-      const estado = document.getElementById("estado").value;
-      const mensaje = `Hola, soy ${nombre} de ${estado}. Quiero apartar los números ${seleccionados.join(", ")}. Mi número es ${telefono}.`;
-      const numAdmin = "5235635088487";
-      window.open(`https://wa.me/${numAdmin}?text=${encodeURIComponent(mensaje)}`);
-    }
-
-    cargarDatos();
+      })
+      .catch(err => {
+        console.error("Error al cargar datos:", err);
+        document.body.innerHTML += "<p>Error al conectar con datos del sorteo.</p>";
+      });
   </script>
 </body>
 </html>
