@@ -1,174 +1,197 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sorteos Arteaga</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #000;
-    color: #FFD700;
-    text-align: center;
-    margin: 0;
-  }
-  header {
-    background-color: #111;
-    padding: 15px;
-  }
-  img.logo {
-    max-width: 120px;
-    border-radius: 10px;
-  }
-  .carrusel {
-    position: relative;
-    max-width: 100%;
-    height: 200px;
-    overflow: hidden;
-    margin: 15px 0;
-  }
-  .carrusel img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    display: none;
-  }
-  .activo {
-    display: block !important;
-  }
-  .descripcion, .pagos, .redes {
-    margin: 10px auto;
-    width: 90%;
-    background: #111;
-    border-radius: 10px;
-    padding: 10px;
-  }
-  .boletos {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 15px;
-  }
-  .boleto {
-    width: 50px;
-    height: 50px;
-    margin: 5px;
-    background-color: #fff;
-    color: #000;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  .vendido {
-    background-color: #222;
-    color: #FFD700;
-    cursor: not-allowed;
-  }
-  button {
-    background-color: #FFD700;
-    color: #000;
-    font-weight: bold;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-  button:hover {
-    background-color: #FFC300;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorteos Arteaga</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #FFD700;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #000;
+      padding: 20px;
+    }
+    header img {
+      max-width: 120px;
+      border-radius: 10px;
+    }
+    h1 {
+      color: #FFD700;
+      margin: 10px 0;
+    }
+    .descripcion {
+      max-width: 600px;
+      margin: 20px auto;
+      font-size: 1.1em;
+      line-height: 1.5em;
+    }
+    .carousel {
+      display: flex;
+      overflow: hidden;
+      justify-content: center;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 500px;
+      border-radius: 10px;
+    }
+    .carousel img {
+      width: 100%;
+      transition: transform 0.5s ease-in-out;
+    }
+    .info {
+      background-color: #222;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      margin: 20px auto;
+    }
+    .btn-apartar {
+      background-color: #FFD700;
+      color: #111;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    .btn-apartar:hover {
+      background-color: #e6c200;
+    }
+    footer {
+      background-color: #000;
+      color: #FFD700;
+      padding: 15px;
+      font-size: 0.9em;
+      margin-top: 30px;
+    }
+    .numero {
+      background-color: white;
+      color: black;
+      border-radius: 4px;
+      display: inline-block;
+      margin: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .numero.seleccionado {
+      background-color: orange;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <img id="logo" class="logo" src="" alt="Logo Sorteos Arteaga">
-</header>
+  <header>
+    <img id="logo" src="" alt="Logo Sorteos Arteaga">
+    <h1>🎟️ Sorteos Arteaga 🎟️</h1>
+  </header>
 
-<div class="carrusel" id="carrusel"></div>
+  <div class="descripcion" id="descripcion"></div>
 
-<div class="descripcion" id="descripcion"></div>
-<div class="pagos" id="pagos"></div>
-<div class="redes" id="redes"></div>
+  <div class="carousel" id="carrusel"></div>
 
-<h2>Selecciona tu número</h2>
-<div class="boletos" id="boletos"></div>
+  <div class="info">
+    <h2>Información del Sorteo</h2>
+    <p><strong>Redes Sociales:</strong> <span id="redes"></span></p>
+    <p><strong>Métodos de Pago:</strong> <span id="pagos"></span></p>
+    <p><strong>WhatsApp:</strong> <span id="whatsapp"></span></p>
+    <p><strong>Número de Emisiones:</strong> <span id="emisiones"></span></p>
+  </div>
 
-<script>
-const scriptURL = "https://script.google.com/macros/s/AKfycbwhRb4ZuTHg5s7wEVqHLN6vwtcnHO0RPidtaZEqwXxN3__X1taodHGYUNdlqsp8PqEGCw/exec";
+  <div>
+    <h2>Selecciona tu número</h2>
+    <div id="numeros"></div>
+    <button class="btn-apartar" onclick="apartarlo()">Apartar</button>
+  </div>
 
-async function cargarDatos() {
-  try {
-    const res = await fetch(scriptURL);
-    const data = await res.json();
-    const ult = data[data.length - 1];
+  <footer>
+    © 2025 Sorteos Arteaga — Todos los derechos reservados.
+  </footer>
 
-    // Mostrar logo
-    if (ult.logo) document.getElementById("logo").src = ult.logo;
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxtK3de3r3txVgVCpQm4bmAjbt4wZXdmQ-RRv61hx24J0l4MIepyJo0pg6JjlOtKMsk/exec";
+    let numeroSeleccionado = null;
+    let data = null;
 
-    // Mostrar descripción, pagos y redes
-    document.getElementById("descripcion").innerHTML = `<h3>Descripción</h3><p>${ult.descripcion || ''}</p>`;
-    document.getElementById("pagos").innerHTML = `<h3>Métodos de Pago</h3><p>${ult.pagos || ''}</p>`;
-    document.getElementById("redes").innerHTML = `<h3>Redes Sociales</h3><p>${ult.redes || ''}</p>`;
+    async function cargarDatos() {
+      try {
+        const res = await fetch(scriptURL);
+        data = await res.json();
+        if (!data || !data.length) return;
 
-    // Carrusel
-    const carrusel = document.getElementById("carrusel");
-    carrusel.innerHTML = "";
-    if (ult.fotos && ult.fotos.length > 0) {
-      ult.fotos.forEach((foto, i) => {
-        const img = document.createElement("img");
-        img.src = foto;
-        if (i === 0) img.classList.add("activo");
-        carrusel.appendChild(img);
-      });
-      iniciarCarrusel();
-    }
+        const ultimo = data[data.length - 1];
+        document.getElementById("descripcion").textContent = ultimo.descripcion || "";
+        document.getElementById("redes").textContent = ultimo.redes || "";
+        document.getElementById("pagos").textContent = ultimo.pagos || "";
+        document.getElementById("whatsapp").textContent = ultimo.whatsapp || "";
+        document.getElementById("emisiones").textContent = ultimo.emisiones || "";
 
-    // Crear boletos
-    const total = parseInt(ult.emisiones) || 0;
-    const vendidos = ult.vendidos ? ult.vendidos.split(",").map(v => v.trim()) : [];
-    const boletosDiv = document.getElementById("boletos");
-    boletosDiv.innerHTML = "";
+        if (ultimo.logo) document.getElementById("logo").src = ultimo.logo;
 
-    for (let i = 1; i <= total; i++) {
-      const b = document.createElement("div");
-      b.classList.add("boleto");
-      b.textContent = i;
-      if (vendidos.includes(i.toString())) {
-        b.classList.add("vendido");
-      } else {
-        b.onclick = () => apartarNumero(i, ult.whatsapp);
+        const carrusel = document.getElementById("carrusel");
+        carrusel.innerHTML = "";
+        if (ultimo.imagenes && ultimo.imagenes.length) {
+          ultimo.imagenes.forEach(img64 => {
+            const img = document.createElement("img");
+            img.src = img64;
+            carrusel.appendChild(img);
+          });
+          iniciarCarrusel();
+        }
+
+        generarNumeros(parseInt(ultimo.emisiones) || 50);
+      } catch (e) {
+        console.error("Error cargando datos:", e);
       }
-      boletosDiv.appendChild(b);
     }
 
-  } catch (err) {
-    console.error(err);
-  }
-}
+    function generarNumeros(total) {
+      const cont = document.getElementById("numeros");
+      cont.innerHTML = "";
+      for (let i = 1; i <= total; i++) {
+        const num = document.createElement("div");
+        num.className = "numero";
+        num.textContent = i;
+        num.onclick = () => {
+          document.querySelectorAll(".numero").forEach(n => n.classList.remove("seleccionado"));
+          num.classList.add("seleccionado");
+          numeroSeleccionado = i;
+        };
+        cont.appendChild(num);
+      }
+    }
 
-function iniciarCarrusel() {
-  let index = 0;
-  const imgs = document.querySelectorAll("#carrusel img");
-  setInterval(() => {
-    imgs.forEach(img => img.classList.remove("activo"));
-    index = (index + 1) % imgs.length;
-    imgs[index].classList.add("activo");
-  }, 3000);
-}
+    function apartarlo() {
+      if (!numeroSeleccionado || !data) {
+        alert("Selecciona un número antes de apartar.");
+        return;
+      }
+      const ultimo = data[data.length - 1];
+      const whatsapp = ultimo.whatsapp ? ultimo.whatsapp.replace(/\D/g, "") : "525635088487";
+      const mensaje = encodeURIComponent(
+        `¡Hola! Quiero apartar el número ${numeroSeleccionado} del sorteo "${ultimo.titulo}".\n\nMi nombre es: _______\nMi estado es: _______\nMi número es: _______\n\nGracias.`
+      );
+      window.open(`https://wa.me/${whatsapp}?text=${mensaje}`, "_blank");
+    }
 
-function apartarNumero(numero, whatsapp) {
-  const nombre = prompt("Escribe tu nombre completo:");
-  const tel = prompt("Escribe tu número de teléfono:");
-  const estado = prompt("Selecciona tu estado:");
-  const mensaje = `Hola, quiero apartar el número ${numero} en Sorteos Arteaga.\nNombre: ${nombre}\nTeléfono: ${tel}\nEstado: ${estado}`;
-  const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(mensaje)}`;
-  window.open(url, "_blank");
-}
+    function iniciarCarrusel() {
+      const imgs = document.querySelectorAll("#carrusel img");
+      let idx = 0;
+      setInterval(() => {
+        imgs.forEach((img, i) => img.style.transform = `translateX(${(i - idx) * 100}%)`);
+        idx = (idx + 1) % imgs.length;
+      }, 3000);
+    }
 
-cargarDatos();
-</script>
+    cargarDatos();
+  </script>
 </body>
 </html>
