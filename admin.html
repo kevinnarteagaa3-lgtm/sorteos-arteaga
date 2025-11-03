@@ -1,102 +1,58 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Panel Sorteos Arteaga</title>
-<style>
-body {
-  background-color: #111;
-  color: #FFD700;
-  font-family: Arial, sans-serif;
-  text-align: center;
-  padding: 20px;
-}
-input, textarea {
-  width: 80%;
-  margin: 5px;
-  padding: 8px;
-  border: 1px solid #FFD700;
-  border-radius: 5px;
-  background: #222;
-  color: #FFD700;
-}
-button {
-  background-color: orange;
-  border: none;
-  padding: 10px 20px;
-  color: #111;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-}
-button:hover { background: #FFD700; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - Sorteos Arteaga</title>
+  <style>
+    body { font-family: Arial; background: #111; color: #FFD700; padding: 20px; text-align: center; }
+    input, textarea { width: 80%; padding: 8px; margin: 5px; border-radius: 5px; border: none; }
+    button { background: #FFD700; color: #000; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+  </style>
 </head>
 <body>
-<h1>⚙️ Panel de Administración ⚙️</h1>
-
-<input type="text" id="titulo" placeholder="Título de la rifa" /><br>
-<textarea id="descripcion" rows="4" placeholder="Descripción de la rifa"></textarea><br>
-<input type="file" id="imagen" accept="image/*"><br>
-<input type="text" id="emisiones" placeholder="Número de emisiones"><br>
-<input type="text" id="redes" placeholder="Redes sociales (Facebook, Instagram)"><br>
-<input type="text" id="pagos" placeholder="Métodos de pago (Oxxo, tarjeta, etc.)"><br>
-<input type="text" id="whatsapp" placeholder="Número de WhatsApp"><br>
-<input type="file" id="logo" accept="image/*"><br>
-<button onclick="guardar()">Guardar cambios</button>
-
-<p id="estado"></p>
-
-<script>
-const SHEETS_URL = "https://script.google.com/macros/s/AKfycbym6UJ3Jt3NIZ9vr1Grg0K0FNIvPZzT0eBI3Rlt84HZp5K10w8yniTBzMopEoi2ATeF/exec";
-
-async function convertirImagenABase64(archivo) {
-  return new Promise((resolve, reject) => {
-    const lector = new FileReader();
-    lector.onload = () => resolve(lector.result);
-    lector.onerror = reject;
-    lector.readAsDataURL(archivo);
-  });
-}
-
-async function guardar() {
-  const estado = document.getElementById("estado");
-  estado.textContent = "Guardando...";
+  <h1>Panel de Administración</h1>
   
-  const titulo = document.getElementById("titulo").value;
-  const descripcion = document.getElementById("descripcion").value;
-  const emisiones = document.getElementById("emisiones").value;
-  const redes = document.getElementById("redes").value;
-  const pagos = document.getElementById("pagos").value;
-  const whatsapp = document.getElementById("whatsapp").value;
+  <label>Título:</label><br>
+  <input id="titulo" placeholder="Ej. Rifa Navidad"><br>
 
-  const imagenArchivo = document.getElementById("imagen").files[0];
-  const logoArchivo = document.getElementById("logo").files[0];
-  
-  let imagenBase64 = "";
-  let logoBase64 = "";
+  <label>Descripción:</label><br>
+  <textarea id="descripcion" rows="3"></textarea><br>
 
-  if (imagenArchivo) imagenBase64 = await convertirImagenABase64(imagenArchivo);
-  if (logoArchivo) logoBase64 = await convertirImagenABase64(logoArchivo);
+  <label>Logo (URL o selección desde tu fototeca):</label><br>
+  <input id="logo" placeholder="https://..."><br>
 
-  const data = {
-    titulo, descripcion, imagen: imagenBase64,
-    emisiones, redes, pagos, whatsapp, logo: logoBase64
-  };
+  <label>Cantidad de boletos (emisiones):</label><br>
+  <input id="emisiones" type="number" min="1" value="50"><br>
 
-  try {
-    await fetch(SHEETS_URL, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: { "Content-Type": "application/json" }
-    });
-    estado.textContent = "✅ Cambios guardados correctamente.";
-  } catch (err) {
-    console.error(err);
-    estado.textContent = "❌ No se pudo conectar con Sheets.";
-  }
-}
-</script>
+  <button onclick="guardarDatos()">💾 Guardar configuración</button>
+
+  <p id="estado"></p>
+
+  <script>
+    const SHEETS_URL = "https://script.google.com/macros/s/AKfycbym6UJ3Jt3NIZ9vr1Grg0K0FNIvPZzT0eBI3Rlt84HZp5K10w8yniTBzMopEoi2ATeF/exec";
+
+    async function guardarDatos() {
+      const datos = {
+        tipo: "guardarAdmin",
+        titulo: document.getElementById("titulo").value,
+        descripcion: document.getElementById("descripcion").value,
+        logo: document.getElementById("logo").value,
+        emisiones: document.getElementById("emisiones").value,
+        apartados: []
+      };
+      try {
+        const res = await fetch(SHEETS_URL, {
+          method: "POST",
+          body: JSON.stringify(datos),
+          headers: { "Content-Type": "application/json" }
+        });
+        const txt = await res.text();
+        document.getElementById("estado").innerText = txt;
+      } catch (err) {
+        document.getElementById("estado").innerText = "❌ Error al guardar.";
+      }
+    }
+  </script>
 </body>
 </html>
