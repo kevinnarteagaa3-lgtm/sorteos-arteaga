@@ -1,91 +1,58 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Administración - Sorteos Arteaga</title>
-  <style>
-    body { background-color: #111; color: #FFD700; font-family: Arial, sans-serif; padding: 20px; text-align: center; }
-    input, textarea { width: 90%; padding: 10px; margin: 8px 0; border: none; border-radius: 5px; }
-    button { background: #FFD700; color: #111; font-weight: bold; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin - Sorteos Arteaga</title>
+<style>
+  body { font-family: Arial; background: #f0f0f0; padding: 20px; }
+  h1 { color: #222; }
+  input, textarea { width: 100%; padding: 8px; margin: 5px 0; }
+  .btn { background: #222; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
+  .btn:hover { background: #555; }
+</style>
 </head>
 <body>
-  <h1>Panel de Administración</h1>
 
-  <input type="file" accept="image/*" id="logoInput" onchange="mostrarLogo(event)">
-  <img id="logoPreview" width="100" style="margin:10px; display:none;">
-  
-  <textarea id="descripcion" placeholder="Descripción de la página..."></textarea>
-  <input id="whatsapp" placeholder="Número WhatsApp (ej. 525635088487)">
-  <input id="emisiones" type="number" placeholder="Número de emisiones">
-  <input id="metodos" placeholder="Métodos de pago">
-  <input id="redes" placeholder="Redes sociales (ej. Facebook, Instagram)">
-  <input id="vendidos" placeholder="Boletos vendidos (separados por coma ej. 1,2,3)">
-  
-  <h3>Fotos del carrusel</h3>
-  <input type="file" multiple accept="image/*" id="fotosInput" onchange="mostrarFotos(event)">
-  <div id="fotosPreview"></div>
+<h1>Panel de Administración</h1>
+<label>Logo URL:</label>
+<input type="text" id="logo"><br>
 
-  <button onclick="guardarDatos()">Guardar Cambios</button>
+<label>Fotos del carrusel (URLs separadas por comas):</label>
+<textarea id="fotos"></textarea><br>
 
-  <p id="estado"></p>
+<label>Total de boletos:</label>
+<input type="number" id="totalBoletos"><br>
 
-  <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwQVdJXzNLlxCidrx14fIZtcGkkhJY2HkFA8TfFVDstX6a9umyU0Hh1b8uRsGrimALq/exec";
-    let fotos = [];
-    let logo = "";
+<label>Boletos vendidos (ejemplo: 1,5,7):</label>
+<input type="text" id="vendidos"><br>
 
-    function mostrarLogo(e) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = function() {
-        logo = reader.result;
-        document.getElementById("logoPreview").src = logo;
-        document.getElementById("logoPreview").style.display = "block";
-      }
-      reader.readAsDataURL(file);
-    }
+<button class="btn" onclick="guardarDatos()">Guardar cambios</button>
 
-    function mostrarFotos(e) {
-      fotos = [];
-      const files = e.target.files;
-      const preview = document.getElementById("fotosPreview");
-      preview.innerHTML = "";
-      Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = function() {
-          fotos.push(reader.result);
-          const img = document.createElement("img");
-          img.src = reader.result;
-          img.width = 100;
-          img.style.margin = "5px";
-          preview.appendChild(img);
-        }
-        reader.readAsDataURL(file);
-      });
-    }
+<p id="msg"></p>
 
-    async function guardarDatos() {
-      const datos = {
-        logo,
-        descripcion: document.getElementById("descripcion").value,
-        whatsapp: document.getElementById("whatsapp").value,
-        emisiones: document.getElementById("emisiones").value,
-        metodos: document.getElementById("metodos").value,
-        redes: document.getElementById("redes").value,
-        vendidos: document.getElementById("vendidos").value.split(","),
-        fotos
-      };
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbzjFYNSoEpbi8qiO5J4_Ax1-5yYGej4aTmoW3myAlDQTsCOjtehUBDg-fDUy3N_9c7U2A/exec";
 
-      const res = await fetch(scriptURL, {
-        method: "POST",
-        body: JSON.stringify(datos),
-        headers: { "Content-Type": "application/json" }
-      });
+async function guardarDatos() {
+  const data = {
+    logo: document.getElementById('logo').value,
+    fotos: document.getElementById('fotos').value.split(","),
+    totalBoletos: parseInt(document.getElementById('totalBoletos').value),
+    vendidos: document.getElementById('vendidos').value.split(",").map(n => parseInt(n))
+  };
 
-      document.getElementById("estado").textContent = res.ok ? "✅ Guardado correctamente" : "❌ Error al guardar";
-    }
-  </script>
+  const res = await fetch(scriptURL, {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
+
+  if (res.ok) {
+    document.getElementById("msg").textContent = "✅ Cambios guardados correctamente.";
+  } else {
+    document.getElementById("msg").textContent = "❌ Error al guardar.";
+  }
+}
+</script>
 </body>
 </html>
