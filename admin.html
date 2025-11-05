@@ -3,125 +3,95 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Admin — Sorteos Arteaga</title>
+<title>Panel Admin — Sorteos Arteaga</title>
 <style>
-  :root{--gold:#D4AF37;--bg:#050505;--panel:#0b0b0b;--muted:#aaa}
-  body{background:var(--bg);color:#fff;font-family:Inter,Arial,sans-serif;margin:0;padding:18px}
-  .wrap{max-width:980px;margin:18px auto}
-  .card{background:linear-gradient(180deg,#0b0b0b,#111);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
-  h1{text-align:center;color:var(--gold);margin:0 0 12px 0}
-  label{display:block;margin-top:10px;color:var(--gold);font-weight:700}
-  input,textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid #222;background:#0d0d0d;color:#fff;margin-top:6px}
-  .row{display:flex;gap:12px;flex-wrap:wrap}
-  .col{flex:1;min-width:180px}
-  button.primary{background:var(--gold);color:#000;border:none;padding:12px;border-radius:10px;font-weight:800;cursor:pointer;margin-top:12px}
-  .small{color:var(--muted);margin-top:8px}
+  :root{
+    --gold:#D4AF37;
+    --bg:#070707;
+    --card:#101010;
+    --muted:#b5b5b5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:white;font-family:Inter,system-ui,Arial,sans-serif}
+  header{padding:18px;text-align:center;background:#000;border-bottom:1px solid rgba(255,255,255,0.1)}
+  h1{color:var(--gold);margin:0}
+  main{max-width:700px;margin:20px auto;padding:18px;display:flex;flex-direction:column;gap:18px}
+  .card{background:var(--card);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.05)}
+  label{font-weight:600;display:block;margin-bottom:4px;color:var(--gold)}
+  input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #333;background:#0a0a0a;color:white;font-size:14px}
+  textarea{min-height:80px;resize:vertical}
+  button{background:var(--gold);border:none;padding:10px 18px;border-radius:10px;font-weight:700;color:#000;cursor:pointer}
+  button:hover{opacity:0.9}
+  .small{color:var(--muted);font-size:13px;margin-top:4px}
+  .divider{height:1px;background:#222;margin:8px 0}
+  .output{margin-top:16px;padding:12px;background:#0b0b0b;border-radius:10px;border:1px solid #222;font-size:13px;color:#bbb}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Panel Administración — Sorteos Arteaga</h1>
+<header>
+  <h1>🎛️ Panel de Administración</h1>
+  <div style="color:var(--muted)">Sorteos Arteaga — Control desde Google Sheets</div>
+</header>
 
-      <label>Logo (URL pública)</label>
-      <input id="logo">
-
-      <label>Fotos del carrusel (URLs separadas por coma)</label>
-      <textarea id="fotos" placeholder="https://img1.jpg, https://img2.jpg"></textarea>
-
-      <label>Descripción (aparece debajo del carrusel)</label>
-      <textarea id="descripcion"></textarea>
-
-      <div class="row">
-        <div class="col">
-          <label>WhatsApp (organizador) — sin +</label>
-          <input id="whatsapp" placeholder="5215635088487">
-        </div>
-        <div class="col">
-          <label>Precio por boleto (MXN)</label>
-          <input id="precio" type="number">
-        </div>
-      </div>
-
-      <label>Promociones</label>
-      <input id="promociones">
-
-      <label>Métodos de pago (cada método en nueva línea; ej. "Transferencia: BANCO 0123456789")</label>
-      <textarea id="metodos_pago" placeholder="Transferencia: BANCO XXXX 0123456789 (Nombre...)&#10;OXXO: 1234567890 (Referencia)"></textarea>
-
-      <div class="row">
-        <div class="col">
-          <label>Número total de emisiones (boletos)</label>
-          <input id="emisiones" type="number" placeholder="Ej. 5000">
-        </div>
-        <div class="col">
-          <label>Boletos vendidos/apartados (números separados por coma)</label>
-          <input id="boletos_vendidos" placeholder="Ej: 1,2,5,20">
-        </div>
-      </div>
-
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-        <button id="guardar" class="primary">💾 Guardar cambios</button>
-        <button id="reload" style="background:#333;color:#fff;border:none;padding:12px;border-radius:10px">↻ Recargar</button>
-      </div>
-
-      <div id="status" class="small">Cargando...</div>
-      <p class="small">Si aparece "Error al guardar", revisa permisos de Apps Script o edita directamente la hoja (SorteosArteagaDatos).</p>
-    </div>
+<main>
+  <div class="card">
+    <label>URL de tu Hoja de Google Sheets (CSV público)</label>
+    <input id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv">
+    <div class="small">Ejemplo: la URL que termina con <code>output=csv</code></div>
   </div>
 
+  <div class="card">
+    <label>Logo (URL)</label>
+    <input id="logoUrl" placeholder="Pega el enlace de tu logo">
+    
+    <label style="margin-top:10px">Imágenes del Carrusel (separadas por comas)</label>
+    <textarea id="imagenes" placeholder="https://..., https://..., https://..."></textarea>
+
+    <label style="margin-top:10px">Descripción</label>
+    <textarea id="descripcion" placeholder="Escribe aquí la descripción del sorteo..."></textarea>
+
+    <label style="margin-top:10px">Métodos de pago (uno por línea)</label>
+    <textarea id="metodosPago" placeholder="Ejemplo:
+BBVA - 1234567890
+OXXO - 1234567890"></textarea>
+
+    <label style="margin-top:10px">Boletos Apartados (separados por comas)</label>
+    <textarea id="vendidos" placeholder="0001,0005,0010"></textarea>
+
+    <label style="margin-top:10px">Total de boletos</label>
+    <input id="emisiones" type="number" value="500">
+
+    <div class="divider"></div>
+    <button id="btnGenerar">🔗 Generar código para copiar a la hoja</button>
+    <div class="output" id="output"></div>
+  </div>
+</main>
+
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzl8-sfJRysbmx8ohQbNbmG-1jt0zX15s5Foth6bordIO_JPkEVPks681EZBSEo_7hUtQ/exec";
+const $ = s => document.querySelector(s);
 
-async function load(){
-  const st = document.getElementById('status'); st.textContent='Cargando...';
-  try {
-    const res = await fetch(SCRIPT_URL);
-    const d = await res.json();
-    document.getElementById('logo').value = d.logo || '';
-    document.getElementById('fotos').value = d.fotos ? (Array.isArray(d.fotos)? d.fotos.join(', ') : d.fotos) : '';
-    document.getElementById('descripcion').value = d.descripcion || '';
-    document.getElementById('whatsapp').value = d.whatsapp || '';
-    document.getElementById('precio').value = d.precio || '';
-    document.getElementById('promociones').value = d.promociones || '';
-    document.getElementById('metodos_pago').value = d.metodos_pago || '';
-    document.getElementById('emisiones').value = d.emisiones || '';
-    document.getElementById('boletos_vendidos').value = d.boletos_vendidos || '';
-    st.textContent='✅ Datos cargados';
-  } catch (err) {
-    console.error('load admin err',err);
-    st.textContent='⚠️ No se pudo cargar (revisa URL/permisos)';
-  }
-}
-
-document.getElementById('guardar').addEventListener('click', async ()=>{
-  const st = document.getElementById('status'); st.textContent='Guardando...';
-  const payload = {
-    action: 'guardar',
-    logo: document.getElementById('logo').value.trim(),
-    fotos: document.getElementById('fotos').value.split(',').map(s=>s.trim()).filter(Boolean),
-    descripcion: document.getElementById('descripcion').value.trim(),
-    whatsapp: document.getElementById('whatsapp').value.trim(),
-    precio: document.getElementById('precio').value,
-    promociones: document.getElementById('promociones').value.trim(),
-    metodos_pago: document.getElementById('metodos_pago').value.trim(),
-    emisiones: Number(document.getElementById('emisiones').value) || 0,
-    boletos_vendidos: document.getElementById('boletos_vendidos').value.trim()
+$('#btnGenerar').onclick = () => {
+  const data = {
+    logo: $('#logoUrl').value.trim(),
+    imagenes: $('#imagenes').value.trim(),
+    descripcion: $('#descripcion').value.trim(),
+    metodos_pago: $('#metodosPago').value.trim(),
+    vendidos: $('#vendidos').value.trim(),
+    emisiones: $('#emisiones').value.trim(),
+    sheet: $('#sheetUrl').value.trim()
   };
-  try {
-    const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-    const txt = await res.text();
-    st.textContent = '✅ Guardado correctamente';
-    setTimeout(()=> load(),700);
-  } catch (err) {
-    console.error('guardar err',err);
-    st.textContent = '❌ Error al guardar (revisa permisos/URL)';
-  }
-});
 
-document.getElementById('reload').addEventListener('click', load);
+  let result = `
+Fila: config | Columna: logo | Valor: ${data.logo}
+Fila: config | Columna: imagenes | Valor: ${data.imagenes}
+Fila: config | Columna: descripcion | Valor: ${data.descripcion}
+Fila: config | Columna: metodos_pago | Valor: ${data.metodos_pago}
+Fila: config | Columna: vendidos | Valor: ${data.vendidos}
+Fila: config | Columna: emisiones | Valor: ${data.emisiones}
+  `.trim();
 
-load();
+  $('#output').innerText = result + "\n\n✅ Copia estos datos en tu hoja de cálculo (en las columnas Config / Campo / Valor)";
+};
 </script>
 </body>
 </html>
