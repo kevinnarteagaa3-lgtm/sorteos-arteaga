@@ -1,86 +1,157 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Panel Admin — Sorteos Arteaga</title>
 <style>
-  body{background:#0b0b0b;color:#f5f5f5;font-family:Poppins,Arial,sans-serif;margin:0;padding:20px}
-  .wrap{max-width:900px;margin:auto}
-  .card{background:#111;border:1px solid #333;border-radius:12px;padding:18px}
-  h1{text-align:center;color:#d4af37}
-  label{display:block;margin-top:12px;font-weight:700;color:#d4af37}
-  input,textarea{width:100%;padding:10px;margin-top:6px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#f5f5f5}
-  textarea{min-height:80px}
-  .row{display:flex;gap:10px;flex-wrap:wrap}
-  .col{flex:1;min-width:160px}
-  button{background:#d4af37;color:#000;border:none;padding:12px 16px;border-radius:10px;font-weight:800;cursor:pointer;margin-top:16px;width:100%}
-  #status{margin-top:12px;color:#aaa}
+  :root {
+    --bg: #000;
+    --card: #111;
+    --gold: #d4af37;
+    --text: #f0f0f0;
+  }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+  }
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(212,175,55,0.2);
+  }
+  h1 {
+    text-align: center;
+    color: var(--gold);
+  }
+  label {
+    font-weight: 600;
+    color: var(--gold);
+    display: block;
+    margin-top: 10px;
+  }
+  input, textarea {
+    width: 100%;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+    background: #222;
+    color: var(--text);
+    margin-top: 5px;
+  }
+  button {
+    width: 100%;
+    margin-top: 15px;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    padding: 12px;
+    cursor: pointer;
+  }
+  #status {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
-    <h1>Panel de Administración</h1>
-    <label>Logo (URL pública)</label>
-    <input id="logo" type="text">
+    <h1>🎟️ Panel de Administración</h1>
+
+    <label>Logo (URL)</label>
+    <input id="logo" type="text" placeholder="https://...">
+
     <label>Fotos del carrusel (URLs separadas por comas)</label>
-    <textarea id="fotos"></textarea>
+    <textarea id="fotos" placeholder="https://img1.jpg, https://img2.jpg"></textarea>
+
     <label>Descripción</label>
-    <textarea id="descripcion"></textarea>
-    <div class="row">
-      <div class="col"><label>WhatsApp</label><input id="whatsapp"></div>
-      <div class="col"><label>Precio</label><input id="precio" type="number"></div>
-    </div>
-    <label>Promociones</label><input id="promociones" type="text">
-    <label>Métodos de pago</label><textarea id="metodos_pago"></textarea>
-    <div class="row">
-      <div class="col"><label>Total boletos</label><input id="emisiones" type="number"></div>
-      <div class="col"><label>Boletos vendidos</label><input id="boletos_vendidos" type="text"></div>
-    </div>
-    <button id="btnGuardar">💾 Guardar cambios</button>
+    <textarea id="descripcion" placeholder="Detalles del sorteo..."></textarea>
+
+    <label>WhatsApp</label>
+    <input id="whatsapp" type="text" placeholder="5215635088487">
+
+    <label>Precio por boleto</label>
+    <input id="precio" type="number" placeholder="100">
+
+    <label>Promociones</label>
+    <input id="promociones" type="text" placeholder="Ej. 2 boletos por 100">
+
+    <label>Métodos de pago</label>
+    <textarea id="metodos_pago" placeholder="Transferencia, OXXO, tarjeta"></textarea>
+
+    <label>Total de boletos</label>
+    <input id="emisiones" type="number" placeholder="Ej. 500">
+
+    <label>Boletos vendidos (números separados por comas)</label>
+    <input id="boletos_vendidos" type="text" placeholder="Ej. 5,8,12">
+
+    <button id="guardar">💾 Guardar cambios</button>
     <div id="status"></div>
   </div>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmFuqT3u9ugnkt2GFbYg1oTkD4yhZfyNVvErAxklMxPpsBh5XabdOkTI3daUNWvHf5bQ/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeVRlKf0ThqSxyfZDiE3u2LLk1KOVTzcxQeY7MUcTIM2lcEZpE20SxzO63HEN4EEm0gQ/exec";
 
-async function cargar(){
-  document.getElementById("status").textContent="Cargando...";
-  try{
-    const res=await fetch(SCRIPT_URL);
-    const d=await res.json();
-    logo.value=d.logo||"";
-    fotos.value=d.fotos||"";
-    descripcion.value=d.descripcion||"";
-    whatsapp.value=d.whatsapp||"";
-    precio.value=d.precio||"";
-    promociones.value=d.promociones||"";
-    metodos_pago.value=d.metodos_pago||"";
-    emisiones.value=d.emisiones||"";
-    boletos_vendidos.value=d.boletos_vendidos||"";
-    status.textContent="Datos cargados correctamente.";
-  }catch(e){status.textContent="Error al cargar.";}
-}
+  async function cargar() {
+    const status = document.getElementById("status");
+    status.textContent = "Cargando...";
+    try {
+      const res = await fetch(SCRIPT_URL);
+      const data = await res.json();
+      for (const [key, val] of Object.entries(data)) {
+        if (document.getElementById(key)) {
+          document.getElementById(key).value = val;
+        }
+      }
+      status.textContent = "✅ Datos cargados correctamente";
+    } catch {
+      status.textContent = "⚠️ No se pudieron cargar los datos";
+    }
+  }
 
-btnGuardar.onclick=async()=>{
-  const p={
-    action:"guardar",
-    logo:logo.value,fotos:fotos.value.split(",").map(s=>s.trim()),
-    descripcion:descripcion.value,whatsapp:whatsapp.value,
-    precio:precio.value,promociones:promociones.value,
-    metodos_pago:metodos_pago.value,emisiones:emisiones.value,
-    boletos_vendidos:boletos_vendidos.value
-  };
-  status.textContent="Guardando...";
-  try{
-    const r=await fetch(SCRIPT_URL,{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});
-    const t=await r.text();
-    status.textContent="✅ Guardado: "+t;
-  }catch(e){status.textContent="❌ Error al guardar.";}
-};
-cargar();
+  document.getElementById("guardar").addEventListener("click", async () => {
+    const status = document.getElementById("status");
+    status.textContent = "Guardando...";
+    const datos = {
+      action: "guardar",
+      logo: logo.value,
+      fotos: fotos.value.split(",").map(x=>x.trim()),
+      descripcion: descripcion.value,
+      whatsapp: whatsapp.value,
+      precio: precio.value,
+      promociones: promociones.value,
+      metodos_pago: metodos_pago.value,
+      emisiones: emisiones.value,
+      boletos_vendidos: boletos_vendidos.value
+    };
+    try {
+      const r = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(datos)
+      });
+      const t = await r.text();
+      status.textContent = "✅ " + t;
+    } catch (e) {
+      status.textContent = "❌ Error al guardar (revisa permisos o URL)";
+    }
+  });
+
+  cargar();
 </script>
 </body>
 </html>
