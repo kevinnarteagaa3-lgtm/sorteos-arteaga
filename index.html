@@ -5,153 +5,151 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sorteos Arteaga</title>
 <style>
-:root {
-  --negro: #0d0d0d;
-  --dorado: #d4af37;
-  --gris: #ccc;
-}
-body {
-  margin: 0;
-  background-color: var(--negro);
-  color: white;
-  font-family: Arial, sans-serif;
-}
-header {
-  text-align: center;
-  padding: 20px;
-  border-bottom: 2px solid var(--dorado);
-}
-header img {
-  max-width: 120px;
-  border-radius: 10px;
-}
-main {
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
-}
-h1 {
-  color: var(--dorado);
-  text-align: center;
-}
-button {
-  background-color: var(--dorado);
-  color: #000;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-}
-button:hover {
-  opacity: 0.9;
-}
-.card {
-  background: #1a1a1a;
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 15px;
-  box-shadow: 0 0 10px rgba(212,175,55,0.3);
-}
-#numeros {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-  gap: 10px;
-  margin-top: 20px;
-}
-.num {
-  background: #222;
-  border: 1px solid var(--dorado);
-  border-radius: 6px;
-  text-align: center;
-  padding: 10px;
-  cursor: pointer;
-}
-.num.vendido {
-  background: #660000;
-  color: #999;
-  border-color: #440000;
-  cursor: not-allowed;
-}
-.num.seleccionado {
-  background: var(--dorado);
-  color: #000;
-}
-footer {
-  text-align: center;
-  padding: 20px;
-  border-top: 2px solid var(--dorado);
-  margin-top: 30px;
-  color: var(--gris);
-}
+  :root {
+    --fondo: #000;
+    --dorado: #d4af37;
+    --texto: #fff;
+  }
+  body {
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    text-align: center;
+    padding: 20px;
+    border-bottom: 2px solid var(--dorado);
+  }
+  header img {
+    max-width: 160px;
+    border-radius: 10px;
+  }
+  h1 {
+    color: var(--dorado);
+    margin-top: 10px;
+  }
+  .descripcion {
+    text-align: center;
+    margin: 15px;
+  }
+  .boletos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 8px;
+    padding: 10px;
+    max-width: 800px;
+    margin: auto;
+  }
+  .boleto {
+    background: #111;
+    color: var(--texto);
+    border: 2px solid var(--dorado);
+    border-radius: 8px;
+    text-align: center;
+    padding: 8px 0;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .boleto:hover {
+    background: var(--dorado);
+    color: #000;
+  }
+  .vendido {
+    background: #333;
+    color: #777;
+    border-color: #444;
+    cursor: not-allowed;
+  }
+  footer {
+    text-align: center;
+    padding: 15px;
+    font-size: 14px;
+    border-top: 1px solid #222;
+  }
+  .btn {
+    background: var(--dorado);
+    color: #000;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+  }
 </style>
 </head>
 <body>
+  <header>
+    <img id="logo" src="" alt="Logo Sorteo">
+    <h1>Sorteos Arteaga</h1>
+  </header>
 
-<header>
-  <img id="logo" src="" alt="Logo Sorteo">
-  <h1>Sorteos Arteaga</h1>
-</header>
+  <div class="descripcion" id="descripcion"></div>
 
-<main>
-  <section id="info" class="card">
-    <h2>Descripción del Sorteo</h2>
-    <p id="descripcion">Cargando...</p>
-    <p><strong>Precio por boleto:</strong> <span id="precio"></span></p>
-    <p><strong>Promociones:</strong> <span id="promociones"></span></p>
-    <p><strong>Métodos de pago:</strong> <span id="metodos_pago"></span></p>
-  </section>
+  <div id="boletos" class="boletos"></div>
 
-  <section id="boletos" class="card">
-    <h2>Selecciona tus números</h2>
-    <div id="numeros"></div>
-    <button id="btnApartar">Apartar seleccionados</button>
-  </section>
-</main>
+  <div style="text-align:center; margin:20px;">
+    <button class="btn" onclick="maquinita()">🎰 Maquinita de la Suerte</button>
+  </div>
 
-<footer>
-  © 2025 Sorteos Arteaga · Desarrollado con pasión y suerte 🍀
-</footer>
+  <footer>
+    <div id="contacto"></div>
+    <p>&copy; 2025 Sorteos Arteaga</p>
+  </footer>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTAsPbHcBouZDGFPxGvmCshB5uLtbff-wiL2-iPaRk8xZ6CgerEJOJaRK7fxUalLlsig/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAHmLZbUkJVeN8_HIgFH5TklWg76T94pH14nQddwlgJmMDv5ud7OyWlvIxkH6wwYf4g/exec";
 
 async function cargarDatos() {
-  try {
-    const res = await fetch(SCRIPT_URL);
-    const data = await res.json();
-    document.getElementById("logo").src = data.logo || "";
-    document.getElementById("descripcion").textContent = data.descripcion || "";
-    document.getElementById("precio").textContent = "$" + (data.precio || "0");
-    document.getElementById("promociones").textContent = data.promociones || "—";
-    document.getElementById("metodos_pago").textContent = data.metodos_pago || "";
+  const r = await fetch(SCRIPT_URL);
+  const data = await r.json();
 
-    const total = Number(data.emisiones) || 100;
-    const vendidos = (data.boletos_vendidos || "").split(",").map(n => n.trim());
-    const cont = document.getElementById("numeros");
-    cont.innerHTML = "";
-    for (let i = 1; i <= total; i++) {
-      const div = document.createElement("div");
-      div.textContent = i;
-      div.className = "num";
-      if (vendidos.includes(i.toString())) div.classList.add("vendido");
-      div.addEventListener("click", () => {
-        if (!div.classList.contains("vendido")) div.classList.toggle("seleccionado");
-      });
-      cont.appendChild(div);
+  document.getElementById("logo").src = data.logo || "";
+  document.getElementById("descripcion").textContent = data.descripcion || "";
+  document.getElementById("contacto").innerHTML =
+    `<p>📱 WhatsApp: <a href="https://wa.me/${data.whatsapp}" style="color:var(--dorado)">${data.whatsapp}</a></p>
+     <p>💳 Métodos de pago: ${data.metodos_pago || ""}</p>`;
+
+  generarBoletos(Number(data.emisiones), data.boletos_vendidos);
+}
+
+function generarBoletos(total, vendidos) {
+  const cont = document.getElementById("boletos");
+  cont.innerHTML = "";
+  const lista = vendidos ? vendidos.split(",").map(v => v.trim()) : [];
+  for (let i = 1; i <= total; i++) {
+    const div = document.createElement("div");
+    div.textContent = i;
+    div.className = "boleto" + (lista.includes(i.toString()) ? " vendido" : "");
+    if (!lista.includes(i.toString())) {
+      div.onclick = () => apartar(i);
     }
-  } catch (err) {
-    console.error(err);
-    alert("Error al cargar datos.");
+    cont.appendChild(div);
   }
 }
-cargarDatos();
 
-document.getElementById("btnApartar").addEventListener("click", () => {
-  const seleccionados = [...document.querySelectorAll(".num.seleccionado")].map(d => d.textContent);
-  if (!seleccionados.length) return alert("Selecciona al menos un número.");
-  alert("Números apartados: " + seleccionados.join(", "));
-});
+function apartar(num) {
+  const nombre = prompt("Ingresa tu nombre completo para apartar el boleto #" + num);
+  if (!nombre) return;
+  const estado = prompt("Ingresa tu estado:");
+  alert(`✅ Boleto #${num} apartado por ${nombre} (${estado}).`);
+}
+
+function maquinita() {
+  const total = document.querySelectorAll(".boleto:not(.vendido)").length;
+  if (total === 0) return alert("No hay boletos disponibles.");
+  const libres = [...document.querySelectorAll(".boleto:not(.vendido)")];
+  const elegido = libres[Math.floor(Math.random() * libres.length)];
+  elegido.scrollIntoView({behavior:"smooth",block:"center"});
+  elegido.style.background = "var(--dorado)";
+  elegido.style.color = "#000";
+  alert("🎰 Tu número de la suerte es: " + elegido.textContent);
+}
+
+cargarDatos();
 </script>
 </body>
 </html>
