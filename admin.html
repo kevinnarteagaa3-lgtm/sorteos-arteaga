@@ -5,92 +5,122 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Panel Admin — Sorteos Arteaga</title>
 <style>
-  :root{
-    --gold:#D4AF37;
-    --bg:#070707;
-    --card:#101010;
-    --muted:#b5b5b5;
-  }
-  *{box-sizing:border-box}
+  :root{--gold:#D4AF37;--bg:#070707;--card:#101010;--muted:#b5b5b5}
   body{margin:0;background:var(--bg);color:white;font-family:Inter,system-ui,Arial,sans-serif}
-  header{padding:18px;text-align:center;background:#000;border-bottom:1px solid rgba(255,255,255,0.1)}
+  header{padding:18px;text-align:center;background:#000;border-bottom:1px solid rgba(255,255,255,0.04)}
   h1{color:var(--gold);margin:0}
-  main{max-width:700px;margin:20px auto;padding:18px;display:flex;flex-direction:column;gap:18px}
-  .card{background:var(--card);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.05)}
-  label{font-weight:600;display:block;margin-bottom:4px;color:var(--gold)}
-  input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #333;background:#0a0a0a;color:white;font-size:14px}
+  main{max-width:820px;margin:18px auto;padding:18px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--card);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+  label{font-weight:700;color:var(--gold);display:block;margin-bottom:6px}
+  input,textarea,select{width:100%;padding:10px;border-radius:8px;border:1px solid #222;background:#0a0a0a;color:#fff;margin-bottom:10px}
   textarea{min-height:80px;resize:vertical}
-  button{background:var(--gold);border:none;padding:10px 18px;border-radius:10px;font-weight:700;color:#000;cursor:pointer}
-  button:hover{opacity:0.9}
-  .small{color:var(--muted);font-size:13px;margin-top:4px}
-  .divider{height:1px;background:#222;margin:8px 0}
-  .output{margin-top:16px;padding:12px;background:#0b0b0b;border-radius:10px;border:1px solid #222;font-size:13px;color:#bbb}
+  .row{display:flex;gap:8px}
+  button{background:var(--gold);color:#000;border:none;padding:10px 12px;border-radius:8px;font-weight:800;cursor:pointer}
+  .small{color:var(--muted);font-size:13px}
+  .output{background:#0b0b0b;padding:12px;border-radius:8px;border:1px solid #222;color:#bdbdbd;white-space:pre-wrap}
 </style>
 </head>
 <body>
 <header>
-  <h1>🎛️ Panel de Administración</h1>
-  <div style="color:var(--muted)">Sorteos Arteaga — Control desde Google Sheets</div>
+  <h1>Panel de Administración — Sorteos Arteaga</h1>
+  <div class="small">Protegido — solo administradores</div>
 </header>
 
 <main>
   <div class="card">
-    <label>URL de tu Hoja de Google Sheets (CSV público)</label>
-    <input id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv">
-    <div class="small">Ejemplo: la URL que termina con <code>output=csv</code></div>
+    <label>Contraseña</label>
+    <input id="pw" type="password" placeholder="Ingresa la contraseña">
+    <div style="display:flex;gap:8px">
+      <button id="btnLogin">Entrar</button>
+    </div>
+    <div id="loginMsg" class="small" style="margin-top:10px"></div>
   </div>
 
-  <div class="card">
-    <label>Logo (URL)</label>
-    <input id="logoUrl" placeholder="Pega el enlace de tu logo">
-    
-    <label style="margin-top:10px">Imágenes del Carrusel (separadas por comas)</label>
-    <textarea id="imagenes" placeholder="https://..., https://..., https://..."></textarea>
+  <div id="panel" style="display:none">
+    <div class="card">
+      <label>URL de la hoja (CSV pública)</label>
+      <input id="sheetUrl" placeholder="https://docs.google.com/...output=csv">
 
-    <label style="margin-top:10px">Descripción</label>
-    <textarea id="descripcion" placeholder="Escribe aquí la descripción del sorteo..."></textarea>
+      <label>Logo (URL pública)</label>
+      <input id="logoUrl" placeholder="https://...">
 
-    <label style="margin-top:10px">Métodos de pago (uno por línea)</label>
-    <textarea id="metodosPago" placeholder="Ejemplo:
-BBVA - 1234567890
-OXXO - 1234567890"></textarea>
+      <label>Imágenes del carrusel (separadas por comas)</label>
+      <textarea id="imagenes" placeholder="https://img1.jpg, https://img2.jpg"></textarea>
 
-    <label style="margin-top:10px">Boletos Apartados (separados por comas)</label>
-    <textarea id="vendidos" placeholder="0001,0005,0010"></textarea>
+      <label>Descripción</label>
+      <textarea id="descripcion" placeholder="Descripción que verá el público"></textarea>
 
-    <label style="margin-top:10px">Total de boletos</label>
-    <input id="emisiones" type="number" value="500">
+      <label>Métodos de pago (separa métodos con | para que se muestren como líneas)</label>
+      <textarea id="metodosPago" placeholder="Transferencia: XXX | OXXO: YYY"></textarea>
 
-    <div class="divider"></div>
-    <button id="btnGenerar">🔗 Generar código para copiar a la hoja</button>
-    <div class="output" id="output"></div>
+      <label>Promociones</label>
+      <input id="promociones" placeholder="Ej: 2 boletos por 100">
+
+      <label>Total de emisiones (boletos)</label>
+      <input id="emisiones" type="number" value="500">
+
+      <label>Boletos vendidos (separados por comas, formato 0001,0002)</label>
+      <textarea id="vendidos" placeholder="0001,0002,0100"></textarea>
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="btnGenerate">Generar filas para Sheets</button>
+        <button id="btnCopy">Copiar al portapapeles</button>
+      </div>
+
+      <div style="margin-top:12px" class="output" id="output">Aquí aparecerá el bloque para pegar en tu hoja (Config / Campo / Valor).</div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:800;color:var(--gold)">Instrucciones rápidas</div>
+      <div class="small" style="margin-top:8px">
+        1) Copia el bloque generado y pégalo en tu hoja de Google Sheets en columnas: <strong>Tipo | Campo | Valor</strong> (ej: config | logo | https...).<br>
+        2) Publica la hoja como CSV (Archivo → Publicar en la web → CSV) y pega la URL en el campo "URL de la hoja" si quieres que este panel recargue la info.<br>
+        3) La página pública (index.html) lee la hoja pública y se actualiza automáticamente.
+      </div>
+    </div>
   </div>
 </main>
 
 <script>
+const PASSWORD = "a090207kevinWAZA";
 const $ = s => document.querySelector(s);
 
-$('#btnGenerar').onclick = () => {
-  const data = {
+$('#btnLogin').onclick = () => {
+  const val = $('#pw').value || '';
+  if(val === PASSWORD){
+    $('#panel').style.display = 'block';
+    $('#loginMsg').textContent = '✔️ Acceso concedido.';
+    window.scrollTo(0,document.body.scrollHeight);
+  } else {
+    $('#loginMsg').textContent = '❌ Contraseña incorrecta.';
+  }
+};
+
+$('#btnGenerate').onclick = () => {
+  const sheet = $('#sheetUrl').value.trim();
+  const obj = {
     logo: $('#logoUrl').value.trim(),
     imagenes: $('#imagenes').value.trim(),
     descripcion: $('#descripcion').value.trim(),
     metodos_pago: $('#metodosPago').value.trim(),
-    vendidos: $('#vendidos').value.trim(),
-    emisiones: $('#emisiones').value.trim(),
-    sheet: $('#sheetUrl').value.trim()
+    promociones: $('#promociones').value.trim(),
+    emisiones: ($('#emisiones').value || '').toString().trim(),
+    vendidos: $('#vendidos').value.trim()
   };
 
-  let result = `
-Fila: config | Columna: logo | Valor: ${data.logo}
-Fila: config | Columna: imagenes | Valor: ${data.imagenes}
-Fila: config | Columna: descripcion | Valor: ${data.descripcion}
-Fila: config | Columna: metodos_pago | Valor: ${data.metodos_pago}
-Fila: config | Columna: vendidos | Valor: ${data.vendidos}
-Fila: config | Columna: emisiones | Valor: ${data.emisiones}
-  `.trim();
+  // Build rows - Tipo | Campo | Valor
+  let out = '';
+  for(const k of ['logo','imagenes','descripcion','metodos_pago','promociones','emisiones','vendidos']){
+    out += `config,${k},${(obj[k]||'')}\n`;
+  }
+  out += `\n# Pegar estas filas (sin #) en tu hoja en columnas: Tipo | Campo | Valor\n`;
+  out += `# Si quieres que index.html lea esta hoja, publica la hoja en CSV y pega la URL en "URL de la hoja".\n`;
+  $('#output').textContent = out;
+};
 
-  $('#output').innerText = result + "\n\n✅ Copia estos datos en tu hoja de cálculo (en las columnas Config / Campo / Valor)";
+$('#btnCopy').onclick = () => {
+  const txt = $('#output').textContent;
+  navigator.clipboard.writeText(txt).then(()=>{ alert('Copiado al portapapeles. Pégalo en tu hoja.'); });
 };
 </script>
 </body>
