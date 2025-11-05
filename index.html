@@ -1,113 +1,127 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sorteos Arteaga 🎟️</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sorteos Arteaga</title>
+<link rel="preconnect" href="https://fonts.gstatic.com">
 <style>
-  :root {
-    --gold: #D4AF37;
-    --black: #000;
-    --gray: #555;
-    --bg: #111;
+  :root{
+    --gold:#D4AF37;
+    --bg:#000;
+    --panel:#0f0f0f;
+    --muted:#999;
+    --sold:#666;
+    --white:#fff;
   }
-  body {
-    font-family: "Poppins", sans-serif;
-    background: var(--bg);
-    color: white;
-    text-align: center;
-    margin: 0;
-    padding: 0;
-  }
-  header {
-    background: var(--black);
-    padding: 15px;
-    color: var(--gold);
-    font-weight: bold;
-    font-size: 1.2em;
-  }
-  .info {
-    margin: 15px;
-    font-size: 0.95em;
-  }
-  .contador {
-    font-size: 1.1em;
-    color: var(--gold);
-    margin-bottom: 15px;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
-    gap: 8px;
-    margin: 20px;
-  }
-  .num {
-    border: 1px solid var(--gold);
-    padding: 10px 0;
-    background: #000;
-    color: var(--gold);
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  .num:hover {
-    background: var(--gold);
-    color: #000;
-  }
-  .num.seleccionado {
-    background: var(--gold);
-    color: #000;
-  }
-  .num.vendido {
-    background: var(--gray);
-    color: #222;
-    cursor: not-allowed;
-  }
-  button {
-    background: var(--gold);
-    color: black;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: 700;
-    cursor: pointer;
-    margin: 15px auto;
-    display: block;
-  }
-  button:hover {
-    background: #c9a531;
-  }
-  .seleccion {
-    margin-top: 15px;
-    color: var(--gold);
-  }
-  .formulario {
-    margin: 15px auto;
-    max-width: 400px;
-  }
-  input, select {
-    width: 100%;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #333;
-    margin: 6px 0;
-  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--white)}
+  header{display:flex;align-items:center;gap:18px;padding:14px 18px;background:#080808;border-bottom:3px solid var(--gold)}
+  .logo {display:flex;align-items:center;gap:12px}
+  .logo img{width:84px;height:84px;object-fit:cover;border-radius:10px;border:2px solid rgba(212,175,55,0.12);background:#111}
+  .title {font-size:20px;color:var(--gold);font-weight:800}
+  .header-right {margin-left:auto;display:flex;gap:12px;align-items:center}
+  .chip{background:var(--panel);padding:8px 12px;border-radius:10px;border:1px solid rgba(212,175,55,0.08);font-weight:700;color:var(--gold)}
+  main {max-width:1100px;margin:18px auto;padding:12px}
+  .top {display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+  .carousel {flex:1;min-width:260px;background:linear-gradient(180deg,#080808,#0f0f0f);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+  .carousel-row{display:flex;gap:8px;overflow:auto;padding:6px}
+  .carousel img{height:140px;border-radius:8px;object-fit:cover}
+  .side {width:320px;min-width:240px}
+  .maquina{background:var(--panel);padding:12px;border-radius:10px;border:1px solid rgba(212,175,55,0.08);margin-bottom:12px}
+  .maquina h3{margin:0 0 8px 0;color:var(--gold)}
+  .maquina .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  select,input{padding:8px;border-radius:8px;border:1px solid #222;background:#0b0b0b;color:var(--white)}
+  button{background:var(--gold);color:#000;border:none;padding:10px 12px;border-radius:8px;font-weight:800;cursor:pointer}
+  .card{background:var(--panel);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+  .desc{margin-top:10px;color:var(--muted);text-align:left}
+  .grid-wrap{margin-top:18px}
+  .grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:8px}
+  .num{padding:10px;border-radius:8px;text-align:center;font-weight:800;border:1px solid rgba(212,175,55,0.14);background:#070707;color:var(--gold);cursor:pointer;user-select:none}
+  .num:hover{transform:translateY(-4px)}
+  .num.seleccionado{background:var(--gold);color:#000;border-color:var(--gold)}
+  .num.vendido{background:var(--sold);color:#222;border-color:#444;cursor:not-allowed}
+  .floating-apartar{position:fixed;right:18px;bottom:18px;z-index:999;display:none}
+  .floating-apartar button{padding:14px 18px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+  .seleccion-txt{margin-top:10px;color:var(--gold);font-weight:700}
+  .whatsapp{margin-top:12px;text-align:left;color:var(--muted)}
+  .copy-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:6px;border-radius:8px;color:var(--gold);cursor:pointer}
+  footer{margin-top:24px;padding:18px;text-align:center;color:var(--muted);border-top:1px solid rgba(255,255,255,0.03)}
+  @media (max-width:900px){ .header-right{display:none} .side{width:100%} .top{flex-direction:column} }
 </style>
 </head>
 <body>
-  <header>🎟️ Boletos en <span style="color:gray;">gris</span> están apartados. Los demás están disponibles.</header>
-  <div class="info" id="descripcion"></div>
-  <div class="contador" id="contador"></div>
 
-  <div class="grid" id="grid"></div>
+<header>
+  <div class="logo">
+    <img id="logoImg" src="" alt="Logo">
+    <div>
+      <div class="title">Sorteos Arteaga</div>
+      <div style="font-size:13px;color:var(--muted)">Participa y gana</div>
+    </div>
+  </div>
 
-  <div class="seleccion" id="seleccion"></div>
+  <div class="header-right">
+    <div class="chip" id="chipDisponibles">— disponibles</div>
+    <div class="chip" id="chipMetodos">Métodos de pago</div>
+  </div>
+</header>
 
-  <div class="formulario" id="formulario" style="display:none;">
-    <input id="nombre" type="text" placeholder="Tu nombre completo">
-    <select id="estado">
-      <option value="">Selecciona tu estado</option>
+<main>
+  <div class="top">
+    <div class="carousel card">
+      <div id="carouselFotos" class="carousel-row"></div>
+      <div class="desc" id="descripcion">Cargando descripción...</div>
+      <div style="margin-top:10px;color:var(--muted)">
+        <strong>Métodos de pago</strong>
+        <div id="metodosPagoArea" style="margin-top:6px"></div>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="maquina card">
+        <h3>🎰 Maquinita de la Suerte</h3>
+        <div class="controls">
+          <label for="maqSelect" style="color:#ddd">Generar:</label>
+          <select id="maqSelect">
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+            <option value="4">4</option><option value="10">10</option><option value="100">100</option>
+            <option value="all">Todos</option>
+          </select>
+          <button id="btnGirar">Girar</button>
+          <button id="btnSelTodos">Seleccionar todos</button>
+          <button id="btnLimpiar">Limpiar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-weight:800;color:var(--gold)">Contacto / Apartados</div>
+        <div class="whatsapp" id="whatsappArea">WhatsApp: <span id="waNum">—</span></div>
+        <div style="margin-top:10px;color:var(--muted)">Legalidad y transparencia: Basados en la Lotería Nacional</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-wrap card" style="margin-top:18px;padding:14px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="font-weight:800">Lista de boletos</div>
+      <div style="color:var(--muted);font-size:14px">Los gris están apartados — los dorados disponibles</div>
+    </div>
+
+    <div id="contador" style="margin-top:10px;color:var(--gold);font-weight:700"></div>
+
+    <div id="grid" class="grid" style="margin-top:12px"></div>
+
+    <div id="seleccionInfo" class="seleccion-txt"></div>
+  </div>
+
+  <!-- formulario modal en linea -->
+  <div id="formArea" style="max-width:480px;margin:18px auto;display:none" class="card">
+    <div style="font-weight:800;margin-bottom:8px">Datos para apartar</div>
+    <input id="inputNombre" placeholder="Nombre completo" style="margin-bottom:8px">
+    <input id="inputTelefono" placeholder="Tu teléfono (ej. 521...) (opcional)" style="margin-bottom:8px">
+    <select id="inputEstado" style="margin-bottom:8px">
+      <option value="">Selecciona Estado</option>
       <option>Aguascalientes</option><option>Baja California</option><option>Baja California Sur</option>
       <option>Campeche</option><option>Chiapas</option><option>Chihuahua</option><option>Ciudad de México</option>
       <option>Coahuila</option><option>Colima</option><option>Durango</option><option>Estado de México</option>
@@ -117,92 +131,228 @@
       <option>San Luis Potosí</option><option>Sinaloa</option><option>Sonora</option><option>Tabasco</option>
       <option>Tamaulipas</option><option>Tlaxcala</option><option>Veracruz</option><option>Yucatán</option><option>Zacatecas</option>
     </select>
-    <button id="btnApartar">📩 Apartar seleccionados</button>
+    <div style="display:flex;gap:8px">
+      <button id="btnEnviarWhats">📲 Enviar por WhatsApp</button>
+      <button id="btnCerrarForm" style="background:#333;color:#fff">Cancelar</button>
+    </div>
+    <div id="confirmMsg" style="margin-top:10px;color:var(--gold);font-weight:700"></div>
   </div>
 
-  <div style="margin:20px;">
-    <label style="color:var(--gold);font-weight:bold;">🎰 Maquinita de la Suerte:</label><br>
-    <select id="cantidad">
-      <option value="1">1 número</option>
-      <option value="2">2 números</option>
-      <option value="3">3 números</option>
-      <option value="4">4 números</option>
-      <option value="10">10 números</option>
-      <option value="100">100 números</option>
-    </select>
-    <button id="btnMaquinita">🎲 Generar</button>
+  <div style="height:80px"></div>
+</main>
+
+<div class="floating-apartar" id="floating">
+  <div>
+    <button id="btnFlotante">📩 Apartar (0)</button>
   </div>
+</div>
+
+<footer>
+  © 2025 Sorteos Arteaga — Legalidad y transparencia (basados en Lotería Nacional)
+</footer>
 
 <script>
+/* ---------- CONFIG ---------- */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzl8-sfJRysbmx8ohQbNbmG-1jt0zX15s5Foth6bordIO_JPkEVPks681EZBSEo_7hUtQ/exec";
-let boletos = [], vendidos = [], seleccionados = [];
 
-async function cargar() {
-  const res = await fetch(SCRIPT_URL);
-  const data = await res.json();
-  const total = Number(data.emisiones) || 0;
-  vendidos = (data.boletos_vendidos || "").split(",").map(x=>x.trim()).filter(Boolean);
-  document.getElementById("descripcion").textContent = data.descripcion || "";
-  document.getElementById("grid").innerHTML = "";
-  const grid = document.getElementById("grid");
-  for (let i=1; i<=total; i++) {
-    let n = i.toString().padStart(total >= 10000 ? 5 : total >= 1000 ? 4 : 3, "0");
-    const div = document.createElement("div");
-    div.className = "num";
-    div.textContent = n;
-    if (vendidos.includes(n)) div.classList.add("vendido");
-    div.onclick = () => toggleSeleccion(n, div);
+/* ---------- STATE ---------- */
+let CONFIG = {};
+let vendidos = new Set();
+let seleccion = new Set();
+
+/* ---------- HELPERS ---------- */
+function padNumber(i,total){
+  // si total>=10000 -> 5 dígitos; else 4 dígitos
+  const padLen = total >= 10000 ? 5 : 4;
+  return i.toString().padStart(padLen,'0');
+}
+function q(sel){ return document.querySelector(sel) }
+function qa(sel){ return Array.from(document.querySelectorAll(sel)) }
+
+/* ---------- CARGA CONFIG desde SCRIPT (GET) ---------- */
+async function cargarConfig(){
+  try {
+    const r = await fetch(SCRIPT_URL);
+    const d = await r.json();
+    CONFIG = d || {};
+    // normalize fields
+    CONFIG.fotos = CONFIG.fotos ? (Array.isArray(CONFIG.fotos) ? CONFIG.fotos : CONFIG.fotos.toString().split(",").map(s=>s.trim())) : [];
+    CONFIG.boletos_vendidos = CONFIG.boletos_vendidos ? CONFIG.boletos_vendidos.toString().split(",").map(s=>s.trim()).filter(Boolean) : [];
+    vendidos = new Set(CONFIG.boletos_vendidos.map(x=>x.toString()));
+    renderAll();
+  } catch (err) {
+    console.error("ERR cargarConfig",err);
+    q('#descripcion').textContent = "No se pudo cargar datos. Revisa la URL del script o tus permisos.";
+  }
+}
+
+/* ---------- RENDER ---------- */
+function renderAll(){
+  // header chips
+  q('#chipDisponibles').textContent = `${(CONFIG.emisiones ? Number(CONFIG.emisiones) : 0) - CONFIG.boletos_vendidos.length} disponibles`;
+  q('#chipMetodos').textContent = "Métodos de pago";
+
+  // logo
+  q('#logoImg').src = CONFIG.logo || "";
+
+  // carousel
+  const car = q('#carouselFotos'); car.innerHTML = "";
+  CONFIG.fotos.forEach(src=>{
+    const im = document.createElement('img'); im.src = src; car.appendChild(im);
+  });
+
+  // descripcion y metodos
+  q('#descripcion').textContent = CONFIG.descripcion || "";
+  const mpArea = q('#metodosPagoArea'); mpArea.innerHTML = "";
+  const mpText = CONFIG.metodos_pago || "";
+  if(mpText){
+    const lines = (Array.isArray(mpText) ? mpText : mpText.toString().split("\n")).map(s=>s.trim()).filter(Boolean);
+    lines.forEach(l=>{
+      const div = document.createElement('div');
+      div.style.display='flex'; div.style.gap='8px'; div.style.alignItems='center'; div.style.marginTop='6px';
+      const span = document.createElement('div'); span.textContent = l; span.style.color='#ddd';
+      const copy = document.createElement('button'); copy.className='copy-btn'; copy.textContent='Copiar';
+      copy.onclick = ()=>{ navigator.clipboard.writeText(l); copy.textContent='Copiado'; setTimeout(()=>copy.textContent='Copiar',1200) };
+      div.appendChild(span); div.appendChild(copy); mpArea.appendChild(div);
+    });
+  }
+
+  // whatsapp
+  q('#waNum').textContent = CONFIG.whatsapp || '—';
+
+  // grid de boletos
+  renderGrid();
+}
+
+/* ---------- RENDER GRID ---------- */
+function renderGrid(){
+  const grid = q('#grid'); grid.innerHTML = '';
+  const total = Number(CONFIG.emisiones) || 0;
+  for(let i=1;i<=total;i++){
+    const label = padNumber(i,total);
+    const div = document.createElement('div');
+    div.className = 'num';
+    div.textContent = label;
+    if(vendidos.has(label)) { div.classList.add('vendido'); }
+    else {
+      div.addEventListener('click', ()=> {
+        if(div.classList.contains('seleccionado')) {
+          div.classList.remove('seleccionado'); seleccion.delete(label);
+        } else {
+          div.classList.add('seleccionado'); seleccion.add(label);
+        }
+        updateUI();
+      });
+    }
     grid.appendChild(div);
   }
-  actualizarContador(total);
+  updateUI();
 }
 
-function actualizarContador(total){
-  const disp = total - vendidos.length;
-  document.getElementById("contador").innerHTML = 
-  `💰 <b>${total}</b> boletos totales — <b>${disp}</b> disponibles`;
+/* ---------- UI updates ---------- */
+function updateUI(){
+  const selArr = Array.from(seleccion).sort((a,b)=> (a-b));
+  q('#seleccionInfo').textContent = selArr.length ? `Seleccionaste: ${selArr.join(', ')}` : '';
+  // contador
+  const total = Number(CONFIG.emisiones) || 0;
+  const disp = total - CONFIG.boletos_vendidos.length;
+  q('#contador').innerHTML = `🎟️ <strong>${total}</strong> boletos totales — <strong>${disp}</strong> disponibles`;
+  // floating button
+  const floating = q('#floating');
+  const btn = q('#btnFlotante');
+  btn.textContent = `📩 Apartar (${selArr.length})`;
+  if(selArr.length>0) floating.style.display='block'; else floating.style.display='none';
 }
 
-function toggleSeleccion(num, div){
-  if(div.classList.contains("vendido")) return;
-  div.classList.toggle("seleccionado");
-  if(div.classList.contains("seleccionado")){
-    seleccionados.push(num);
+/* ---------- MAQUINITA ---------- */
+q('#btnGirar').addEventListener('click', ()=>{
+  const opt = q('#maqSelect').value;
+  const total = Number(CONFIG.emisiones) || 0;
+  let disponibles = qa('.num:not(.vendido)').map(n=>n.textContent);
+  if(opt==='all') {
+    // seleccionar todos disponibles
+    seleccion = new Set(disponibles);
   } else {
-    seleccionados = seleccionados.filter(n => n !== num);
+    const count = Math.min(Number(opt), disponibles.length);
+    seleccion = new Set();
+    for(let i=0;i<count;i++){
+      const idx = Math.floor(Math.random()*disponibles.length);
+      const pick = disponibles.splice(idx,1)[0];
+      seleccion.add(pick);
+    }
   }
-  document.getElementById("seleccion").innerHTML = 
-  seleccionados.length ? `Seleccionaste: ${seleccionados.join(", ")}` : "";
-  document.getElementById("formulario").style.display = seleccionados.length ? "block" : "none";
-}
-
-document.getElementById("btnMaquinita").onclick = ()=>{
-  const cant = Number(document.getElementById("cantidad").value);
-  const disponibles = [...document.querySelectorAll(".num:not(.vendido)")].map(d=>d.textContent);
-  seleccionados = [];
-  for(let i=0;i<cant && disponibles.length;i++){
-    const random = disponibles.splice(Math.floor(Math.random()*disponibles.length),1)[0];
-    seleccionados.push(random);
-  }
-  document.querySelectorAll(".num").forEach(d=>{
-    d.classList.toggle("seleccionado", seleccionados.includes(d.textContent));
+  // update classes
+  qa('.num').forEach(n=>{
+    if(seleccion.has(n.textContent)) n.classList.add('seleccionado'); else n.classList.remove('seleccionado');
   });
-  document.getElementById("seleccion").innerHTML = `Seleccionaste: ${seleccionados.join(", ")}`;
-  document.getElementById("formulario").style.display = "block";
-}
+  updateUI();
+});
 
-document.getElementById("btnApartar").onclick = ()=>{
-  const nombre = document.getElementById("nombre").value.trim();
-  const estado = document.getElementById("estado").value;
-  if(!nombre || !estado || seleccionados.length===0) {
-    alert("Completa tus datos y selecciona boletos.");
-    return;
+q('#btnSelTodos').addEventListener('click', ()=>{
+  const dispo = qa('.num:not(.vendido)').map(n=>n.textContent);
+  seleccion = new Set(dispo);
+  qa('.num').forEach(n=>{ if(seleccion.has(n.textContent)) n.classList.add('seleccionado'); });
+  updateUI();
+});
+q('#btnLimpiar').addEventListener('click', ()=>{
+  seleccion.clear();
+  qa('.num.seleccionado').forEach(n=>n.classList.remove('seleccionado'));
+  updateUI();
+});
+
+/* ---------- APARTAR flow ---------- */
+q('#btnFlotante').addEventListener('click', ()=> {
+  // open form area
+  q('#formArea').style.display = 'block';
+  // prefill name/phone blank
+});
+q('#btnCerrarForm').addEventListener('click', ()=> {
+  q('#formArea').style.display = 'none';
+  q('#confirmMsg').textContent = '';
+});
+
+q('#btnEnviarWhats').addEventListener('click', async ()=>{
+  const nombre = q('#inputNombre').value.trim();
+  const telefono = q('#inputTelefono').value.trim();
+  const estado = q('#inputEstado').value;
+  if(!nombre || !estado){ alert('Completa tu nombre y estado'); return; }
+  const nums = Array.from(seleccion).sort((a,b)=> (Number(a)-Number(b)));
+  if(nums.length===0){ alert('Selecciona al menos un número'); return; }
+
+  // armar mensaje
+  const adminWA = (CONFIG.whatsapp || '').toString().replace(/\D/g,'');
+  const msgText = `¡Hola! Quiero apartar estos boletos: ${nums.join(', ')}.%0ANombre: ${encodeURIComponent(nombre)}%0ATeléfono: ${encodeURIComponent(telefono)}%0AEstado: ${encodeURIComponent(estado)}%0APrecio por boleto: ${encodeURIComponent(CONFIG.precio||'')}%0APromociones: ${encodeURIComponent(CONFIG.promociones||'')}`;
+  // abrir WhatsApp
+  window.open(`https://wa.me/${adminWA}?text=${msgText}`,'_blank');
+
+  // intentar guardar en Sheets vía POST (si tu script acepta action 'apartar')
+  const payload = {
+    action: 'apartar',
+    numeros: nums,
+    nombre, telefono, estado,
+    fecha: new Date().toISOString()
+  };
+  try {
+    const resp = await fetch(SCRIPT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const txt = await resp.text();
+    q('#confirmMsg').textContent = '✅ Apartado enviado. ' + txt;
+    // opcional: refrescar datos (si el script actualizó boletos vendidos)
+    setTimeout(()=> cargarConfig(), 900);
+  } catch (err) {
+    console.error('Error POST apartar',err);
+    q('#confirmMsg').textContent = '✅ WhatsApp abierto (si no se guardó en la hoja, revisa permisos).';
   }
-  alert(`📩 ${nombre} (${estado}) apartó: ${seleccionados.join(", ")}`);
-  location.reload();
-};
 
-cargar();
+  // cerrar form y limpiar selección
+  setTimeout(()=>{ q('#formArea').style.display='none'; seleccion.clear(); qa('.num.seleccionado').forEach(n=>n.classList.remove('seleccionado')); updateUI(); }, 600);
+});
+
+/* ---------- INIT ---------- */
+cargarConfig();
 </script>
 </body>
 </html>
