@@ -1,98 +1,157 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sorteos Arteaga</title>
 <style>
-  body {
-    background: #000;
-    color: #f8f8f8;
-    font-family: 'Poppins', sans-serif;
-    margin: 0;
-    text-align: center;
-  }
-  header {
-    padding: 20px;
-    border-bottom: 2px solid #d4af37;
-  }
-  header img {
-    width: 120px;
-    height: auto;
-    border-radius: 10px;
-  }
-  .descripcion {
-    padding: 20px;
-    font-size: 18px;
-  }
-  .precio {
-    color: #d4af37;
-    font-size: 24px;
-    margin-top: 10px;
-  }
-  footer {
-    border-top: 1px solid #333;
-    padding: 15px;
-    color: #aaa;
-  }
-  .fotos {
-    display: flex;
-    overflow-x: auto;
-    gap: 10px;
-    padding: 10px;
-  }
-  .fotos img {
-    height: 200px;
-    border-radius: 10px;
-  }
+:root {
+  --negro: #0d0d0d;
+  --dorado: #d4af37;
+  --gris: #ccc;
+}
+body {
+  margin: 0;
+  background-color: var(--negro);
+  color: white;
+  font-family: Arial, sans-serif;
+}
+header {
+  text-align: center;
+  padding: 20px;
+  border-bottom: 2px solid var(--dorado);
+}
+header img {
+  max-width: 120px;
+  border-radius: 10px;
+}
+main {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+h1 {
+  color: var(--dorado);
+  text-align: center;
+}
+button {
+  background-color: var(--dorado);
+  color: #000;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+button:hover {
+  opacity: 0.9;
+}
+.card {
+  background: #1a1a1a;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 15px;
+  box-shadow: 0 0 10px rgba(212,175,55,0.3);
+}
+#numeros {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+.num {
+  background: #222;
+  border: 1px solid var(--dorado);
+  border-radius: 6px;
+  text-align: center;
+  padding: 10px;
+  cursor: pointer;
+}
+.num.vendido {
+  background: #660000;
+  color: #999;
+  border-color: #440000;
+  cursor: not-allowed;
+}
+.num.seleccionado {
+  background: var(--dorado);
+  color: #000;
+}
+footer {
+  text-align: center;
+  padding: 20px;
+  border-top: 2px solid var(--dorado);
+  margin-top: 30px;
+  color: var(--gris);
+}
 </style>
 </head>
 <body>
+
 <header>
-  <img id="logo" src="" alt="Logo">
+  <img id="logo" src="" alt="Logo Sorteo">
   <h1>Sorteos Arteaga</h1>
 </header>
 
-<div class="fotos" id="fotos"></div>
-<div class="descripcion" id="descripcion"></div>
-<div class="precio" id="precio"></div>
-<p id="promociones"></p>
-<p><b>Métodos de pago:</b> <span id="metodos_pago"></span></p>
-<p><b>WhatsApp:</b> <span id="whatsapp"></span></p>
-<p><b>Boletos vendidos:</b> <span id="boletos_vendidos"></span> / <span id="emisiones"></span></p>
+<main>
+  <section id="info" class="card">
+    <h2>Descripción del Sorteo</h2>
+    <p id="descripcion">Cargando...</p>
+    <p><strong>Precio por boleto:</strong> <span id="precio"></span></p>
+    <p><strong>Promociones:</strong> <span id="promociones"></span></p>
+    <p><strong>Métodos de pago:</strong> <span id="metodos_pago"></span></p>
+  </section>
+
+  <section id="boletos" class="card">
+    <h2>Selecciona tus números</h2>
+    <div id="numeros"></div>
+    <button id="btnApartar">Apartar seleccionados</button>
+  </section>
+</main>
 
 <footer>
-  © 2025 Sorteos Arteaga — Conectado a Google Sheets
+  © 2025 Sorteos Arteaga · Desarrollado con pasión y suerte 🍀
 </footer>
 
 <script>
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeVRlKf0ThqSxyfZDiE3u2LLk1KOVTzcxQeY7MUcTIM2lcEZpE20SxzO63HEN4EEm0gQ/exec";
-  async function cargar() {
-    try {
-      const res = await fetch(SCRIPT_URL);
-      const d = await res.json();
-      document.getElementById("logo").src = d.logo || "";
-      document.getElementById("descripcion").textContent = d.descripcion || "";
-      document.getElementById("precio").textContent = d.precio ? `$${d.precio} MXN` : "";
-      document.getElementById("promociones").textContent = d.promociones || "";
-      document.getElementById("metodos_pago").textContent = d.metodos_pago || "";
-      document.getElementById("whatsapp").textContent = d.whatsapp || "";
-      document.getElementById("emisiones").textContent = d.emisiones || "";
-      document.getElementById("boletos_vendidos").textContent = d.boletos_vendidos || "";
-      const fotosDiv = document.getElementById("fotos");
-      fotosDiv.innerHTML = "";
-      if (d.fotos) {
-        d.fotos.split(",").forEach(url => {
-          const img = document.createElement("img");
-          img.src = url.trim();
-          fotosDiv.appendChild(img);
-        });
-      }
-    } catch (err) {
-      document.body.innerHTML = "<p style='color:#d4af37'>⚠️ No se pudo cargar la información</p>";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTAsPbHcBouZDGFPxGvmCshB5uLtbff-wiL2-iPaRk8xZ6CgerEJOJaRK7fxUalLlsig/exec";
+
+async function cargarDatos() {
+  try {
+    const res = await fetch(SCRIPT_URL);
+    const data = await res.json();
+    document.getElementById("logo").src = data.logo || "";
+    document.getElementById("descripcion").textContent = data.descripcion || "";
+    document.getElementById("precio").textContent = "$" + (data.precio || "0");
+    document.getElementById("promociones").textContent = data.promociones || "—";
+    document.getElementById("metodos_pago").textContent = data.metodos_pago || "";
+
+    const total = Number(data.emisiones) || 100;
+    const vendidos = (data.boletos_vendidos || "").split(",").map(n => n.trim());
+    const cont = document.getElementById("numeros");
+    cont.innerHTML = "";
+    for (let i = 1; i <= total; i++) {
+      const div = document.createElement("div");
+      div.textContent = i;
+      div.className = "num";
+      if (vendidos.includes(i.toString())) div.classList.add("vendido");
+      div.addEventListener("click", () => {
+        if (!div.classList.contains("vendido")) div.classList.toggle("seleccionado");
+      });
+      cont.appendChild(div);
     }
+  } catch (err) {
+    console.error(err);
+    alert("Error al cargar datos.");
   }
-  cargar();
+}
+cargarDatos();
+
+document.getElementById("btnApartar").addEventListener("click", () => {
+  const seleccionados = [...document.querySelectorAll(".num.seleccionado")].map(d => d.textContent);
+  if (!seleccionados.length) return alert("Selecciona al menos un número.");
+  alert("Números apartados: " + seleccionados.join(", "));
+});
 </script>
 </body>
 </html>
