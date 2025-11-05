@@ -2,120 +2,117 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Sorteos Arteaga</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel Admin — Sorteos Arteaga</title>
 <style>
-:root {
-  --negro: #0d0d0d;
-  --dorado: #d4af37;
-  --gris: #bbb;
-}
-body {
-  background: var(--negro);
-  color: var(--dorado);
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 20px;
-}
-.container {
-  max-width: 700px;
-  margin: auto;
-  background: #111;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(212,175,55,0.3);
-}
-h1 {
-  text-align: center;
-  color: var(--dorado);
-}
-label {
-  display: block;
-  margin-top: 10px;
-}
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid var(--dorado);
-  background: #1a1a1a;
-  color: var(--dorado);
-}
-button {
-  background: var(--dorado);
-  color: #000;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 15px;
-}
-button:hover {
-  opacity: 0.9;
-}
-#msg {
-  text-align: center;
-  margin-top: 10px;
-  color: var(--dorado);
-}
+  body {
+    background: #000;
+    color: #fff;
+    font-family: Poppins, sans-serif;
+    padding: 20px;
+  }
+  .card {
+    background: #111;
+    border: 1px solid #d4af37;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+  }
+  h1 {
+    text-align: center;
+    color: #d4af37;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+    color: #d4af37;
+    font-weight: 600;
+  }
+  input, textarea {
+    width: 100%;
+    border-radius: 8px;
+    border: none;
+    padding: 8px;
+    margin-top: 5px;
+  }
+  button {
+    background: #d4af37;
+    color: #000;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+  #estado {
+    margin-top: 10px;
+  }
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>Panel Sorteos Arteaga</h1>
+  <div class="card">
+    <h1>Panel de Administración</h1>
 
-  <label>Logo (URL pública)</label>
-  <input id="logo" type="text" placeholder="https://...">
+    <label>URL del logo</label>
+    <input id="logo">
 
-  <label>Descripción</label>
-  <textarea id="descripcion" placeholder="Descripción del sorteo..."></textarea>
+    <label>Fotos (URLs separadas por coma)</label>
+    <textarea id="fotos"></textarea>
 
-  <label>Precio por boleto</label>
-  <input id="precio" type="number" placeholder="Ej: 100">
+    <label>Descripción</label>
+    <textarea id="descripcion"></textarea>
 
-  <label>Promociones</label>
-  <input id="promociones" type="text" placeholder="Ej: 2x100">
+    <label>WhatsApp</label>
+    <input id="whatsapp">
 
-  <label>Métodos de pago</label>
-  <textarea id="metodos_pago" placeholder="Transferencia, OXXO..."></textarea>
+    <label>Precio por boleto</label>
+    <input id="precio">
 
-  <label>Total de boletos</label>
-  <input id="emisiones" type="number" placeholder="Ej: 2500">
+    <label>Promociones</label>
+    <input id="promociones">
 
-  <label>Boletos vendidos (separados por coma)</label>
-  <input id="boletos_vendidos" type="text" placeholder="Ej: 4,7,22">
+    <label>Métodos de pago</label>
+    <textarea id="metodos_pago"></textarea>
 
-  <button id="guardar">💾 Guardar cambios</button>
-  <div id="msg"></div>
-</div>
+    <label>Número total de boletos</label>
+    <input id="emisiones">
+
+    <label>Boletos vendidos (separados por coma)</label>
+    <input id="boletos_vendidos">
+
+    <button id="guardar">Guardar Cambios</button>
+    <div id="estado"></div>
+  </div>
 
 <script>
-const scriptURL = "https://script.google.com/macros/s/AKfycbxTAsPbHcBouZDGFPxGvmCshB5uLtbff-wiL2-iPaRk8xZ6CgerEJOJaRK7fxUalLlsig/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAHmLZbUkJVeN8_HIgFH5TklWg76T94pH14nQddwlgJmMDv5ud7OyWlvIxkH6wwYf4g/exec";
 
 document.getElementById("guardar").addEventListener("click", async () => {
   const data = {
     action: "guardar",
     logo: document.getElementById("logo").value,
+    fotos: document.getElementById("fotos").value.split(","),
     descripcion: document.getElementById("descripcion").value,
+    whatsapp: document.getElementById("whatsapp").value,
     precio: document.getElementById("precio").value,
     promociones: document.getElementById("promociones").value,
     metodos_pago: document.getElementById("metodos_pago").value,
     emisiones: document.getElementById("emisiones").value,
     boletos_vendidos: document.getElementById("boletos_vendidos").value
   };
-  document.getElementById("msg").textContent = "Guardando...";
+  document.getElementById("estado").textContent = "⏳ Guardando...";
   try {
-    const res = await fetch(scriptURL, {
+    const res = await fetch(SCRIPT_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(data)
     });
-    const txt = await res.text();
-    document.getElementById("msg").textContent = "✅ Guardado correctamente";
-  } catch (e) {
-    document.getElementById("msg").textContent = "❌ Error al guardar (revisa permisos o URL)";
+    const t = await res.text();
+    document.getElementById("estado").textContent = "✅ Guardado correctamente";
+  } catch (err) {
+    document.getElementById("estado").textContent = "❌ Error al guardar (verifica permisos o URL)";
   }
 });
 </script>
