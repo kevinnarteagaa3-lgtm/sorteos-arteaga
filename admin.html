@@ -1,120 +1,123 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Panel Admin — Sorteos Arteaga</title>
 <style>
-  body {
-    background: #000;
-    color: #fff;
-    font-family: Poppins, sans-serif;
-    padding: 20px;
-  }
-  .card {
-    background: #111;
-    border: 1px solid #d4af37;
-    border-radius: 10px;
-    padding: 20px;
-    max-width: 800px;
-    margin: auto;
-  }
-  h1 {
-    text-align: center;
-    color: #d4af37;
-  }
-  label {
-    display: block;
-    margin-top: 10px;
-    color: #d4af37;
-    font-weight: 600;
-  }
-  input, textarea {
-    width: 100%;
-    border-radius: 8px;
-    border: none;
-    padding: 8px;
-    margin-top: 5px;
-  }
-  button {
-    background: #d4af37;
-    color: #000;
-    border: none;
-    padding: 10px;
-    border-radius: 8px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 15px;
-  }
-  #estado {
-    margin-top: 10px;
-  }
+:root{--bg:#000;--gold:#d4af37;--panel:#111;--text:#fff}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif;padding:18px}
+.wrap{max-width:900px;margin:0 auto}
+.card{background:var(--panel);padding:18px;border-radius:10px;border:1px solid rgba(212,175,55,0.12)}
+h1{color:var(--gold);text-align:center}
+label{display:block;margin-top:10px;color:var(--gold);font-weight:700}
+input,textarea,select{width:100%;padding:10px;border-radius:8px;background:#0f0f0f;border:1px solid #222;color:var(--text);margin-top:6px}
+.row{display:flex;gap:10px}
+.col{flex:1}
+.btn{background:var(--gold);color:#000;border:0;padding:12px;border-radius:8px;font-weight:800;cursor:pointer;margin-top:12px}
+#status{margin-top:10px;text-align:center;color:var(--gold);font-weight:700}
+.small{font-size:13px;color:#aaa;margin-top:8px}
 </style>
 </head>
 <body>
+<div class="wrap">
   <div class="card">
-    <h1>Panel de Administración</h1>
+    <h1>Panel de Administración — Sorteos Arteaga</h1>
 
-    <label>URL del logo</label>
-    <input id="logo">
+    <label>Logo (URL pública)</label>
+    <input id="logo" placeholder="https://...">
 
-    <label>Fotos (URLs separadas por coma)</label>
-    <textarea id="fotos"></textarea>
+    <label>Fotos del carrusel (URLs separadas por comas)</label>
+    <textarea id="fotos" placeholder="https://img1.jpg, https://img2.jpg"></textarea>
 
     <label>Descripción</label>
     <textarea id="descripcion"></textarea>
 
-    <label>WhatsApp</label>
-    <input id="whatsapp">
-
-    <label>Precio por boleto</label>
-    <input id="precio">
+    <div class="row">
+      <div class="col">
+        <label>WhatsApp (sin +)</label>
+        <input id="whatsapp" placeholder="5215635088487">
+      </div>
+      <div class="col">
+        <label>Precio por boleto (MXN)</label>
+        <input id="precio" type="number">
+      </div>
+    </div>
 
     <label>Promociones</label>
     <input id="promociones">
 
-    <label>Métodos de pago</label>
+    <label>Métodos de pago (texto)</label>
     <textarea id="metodos_pago"></textarea>
 
-    <label>Número total de boletos</label>
-    <input id="emisiones">
+    <div class="row">
+      <div class="col"><label>Total de emisiones (boletos)</label><input id="emisiones" type="number"></div>
+      <div class="col"><label>Boletos vendidos (números separados por coma)</label><input id="boletos_vendidos"></div>
+    </div>
 
-    <label>Boletos vendidos (separados por coma)</label>
-    <input id="boletos_vendidos">
-
-    <button id="guardar">Guardar Cambios</button>
-    <div id="estado"></div>
+    <button class="btn" id="guardar">💾 Guardar configuración</button>
+    <div id="status">Cargando...</div>
+    <div class="small">Nota: si te marca error al guardar revisa que tu Script URL y permisos estén activados.</div>
   </div>
+</div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAHmLZbUkJVeN8_HIgFH5TklWg76T94pH14nQddwlgJmMDv5ud7OyWlvIxkH6wwYf4g/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzl8-sfJRysbmx8ohQbNbmG-1jt0zX15s5Foth6bordIO_JPkEVPks681EZBSEo_7hUtQ/exec";
 
-document.getElementById("guardar").addEventListener("click", async () => {
-  const data = {
-    action: "guardar",
-    logo: document.getElementById("logo").value,
-    fotos: document.getElementById("fotos").value.split(","),
-    descripcion: document.getElementById("descripcion").value,
-    whatsapp: document.getElementById("whatsapp").value,
-    precio: document.getElementById("precio").value,
-    promociones: document.getElementById("promociones").value,
-    metodos_pago: document.getElementById("metodos_pago").value,
-    emisiones: document.getElementById("emisiones").value,
-    boletos_vendidos: document.getElementById("boletos_vendidos").value
+async function cargar(){
+  const s = document.getElementById('status');
+  s.textContent = 'Cargando...';
+  try {
+    const r = await fetch(SCRIPT_URL);
+    const d = await r.json();
+    document.getElementById('logo').value = d.logo || '';
+    document.getElementById('fotos').value = (d.fotos && Array.isArray(d.fotos)) ? d.fotos.join(', ') : (d.fotos || '');
+    document.getElementById('descripcion').value = d.descripcion || '';
+    document.getElementById('whatsapp').value = d.whatsapp || '';
+    document.getElementById('precio').value = d.precio || '';
+    document.getElementById('promociones').value = d.promociones || '';
+    document.getElementById('metodos_pago').value = d.metodos_pago || '';
+    document.getElementById('emisiones').value = d.emisiones || '';
+    document.getElementById('boletos_vendidos').value = d.boletos_vendidos || '';
+    s.textContent = '✅ Datos cargados';
+  } catch (err) {
+    console.error(err);
+    s.textContent = '⚠️ No se pudo cargar (revisa URL/permisos)';
+  }
+}
+
+document.getElementById('guardar').addEventListener('click', async ()=>{
+  const s = document.getElementById('status');
+  s.textContent = 'Guardando...';
+  const payload = {
+    action: 'guardar',
+    logo: document.getElementById('logo').value.trim(),
+    fotos: document.getElementById('fotos').value.split(',').map(x=>x.trim()).filter(Boolean),
+    descripcion: document.getElementById('descripcion').value.trim(),
+    whatsapp: document.getElementById('whatsapp').value.trim(),
+    precio: document.getElementById('precio').value,
+    promociones: document.getElementById('promociones').value.trim(),
+    metodos_pago: document.getElementById('metodos_pago').value.trim(),
+    emisiones: Number(document.getElementById('emisiones').value) || 0,
+    boletos_vendidos: document.getElementById('boletos_vendidos').value.trim()
   };
-  document.getElementById("estado").textContent = "⏳ Guardando...";
   try {
     const res = await fetch(SCRIPT_URL, {
-      method: "POST",
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(data)
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
     });
-    const t = await res.text();
-    document.getElementById("estado").textContent = "✅ Guardado correctamente";
+    const txt = await res.text();
+    s.textContent = '✅ ' + txt;
+    // refrescar
+    setTimeout(()=> cargar(), 800);
   } catch (err) {
-    document.getElementById("estado").textContent = "❌ Error al guardar (verifica permisos o URL)";
+    console.error(err);
+    s.textContent = '❌ Error al guardar (revisa permisos/URL)';
   }
 });
+
+cargar();
 </script>
 </body>
 </html>
