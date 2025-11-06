@@ -49,23 +49,19 @@
 </header>
 
 <main>
-  <!-- CARRUSEL (ARRIBA) -->
   <div class="card" id="cardCarousel">
     <div id="carouselRow" class="carousel-row"></div>
   </div>
 
-  <!-- DESCRIPCIÓN -->
   <div class="card">
     <div id="descripcion" class="about">Cargando descripción...</div>
   </div>
 
-  <!-- MÉTODOS DE PAGO -->
   <div class="card">
     <div class="methods" id="methodsArea">Cargando métodos de pago...</div>
     <div id="promos" class="promos"></div>
   </div>
 
-  <!-- MAQUINITA -->
   <div class="card" style="text-align:center">
     <h3 style="color:var(--gold);margin:0">🎰 Maquinita de la Suerte</h3>
     <div class="row-flex">
@@ -82,13 +78,11 @@
     <div id="maqResult" class="seleccionTxt"></div>
   </div>
 
-  <!-- PROMOCIONES (separado arriba list) -->
   <div id="promotionsCard" class="card" style="display:none">
     <div style="font-weight:800;color:var(--gold)">Promociones</div>
     <div id="promosList" style="margin-top:8px;color:var(--white)"></div>
   </div>
 
-  <!-- LISTA DE BOLETOS -->
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div style="font-weight:800">Lista de boletos</div>
@@ -99,7 +93,6 @@
     <div id="selectionText" class="seleccionTxt"></div>
   </div>
 
-  <!-- FAQ / ABOUT -->
   <div class="card">
     <div style="font-weight:800;color:var(--gold)">Preguntas frecuentes</div>
     <div class="faq" style="margin-top:8px">
@@ -111,17 +104,13 @@
   </div>
 </main>
 
-<!-- Modal Apartar -->
 <div id="modalBack" class="modal-back">
   <div class="modal">
     <h3>📩 Apartar boletos</h3>
-
     <label>Números seleccionados</label>
     <input id="modalNums" readonly>
-
     <label>Nombre completo</label>
     <input id="modalNombre" placeholder="Ej. Juan Pérez">
-
     <label>Estado</label>
     <select id="modalEstado">
       <option value="">Selecciona estado</option>
@@ -134,10 +123,8 @@
       <option>San Luis Potosí</option><option>Sinaloa</option><option>Sonora</option><option>Tabasco</option>
       <option>Tamaulipas</option><option>Tlaxcala</option><option>Veracruz</option><option>Yucatán</option><option>Zacatecas</option>
     </select>
-
     <label>Teléfono</label>
     <input id="modalTelefono" placeholder="Ej. 521XXXXXXXXXX">
-
     <div style="display:flex;gap:8px;margin-top:10px">
       <button id="modalEnviar" style="background:#e53935;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">Enviar y apartar</button>
       <button id="modalCerrar" style="background:#333;color:#fff;border:none;padding:12px;border-radius:10px">Cancelar</button>
@@ -154,180 +141,7 @@
 </footer>
 
 <script>
-/*  CONFIG: pega aquí tu CSV público y (opcional) tu Apps Script POST URL */
+/*  CONFIG: pega aquí tu CSV público */
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXgIMoW1LvdfzyJsFX75DuMWdoNctr7FAexHUz_TTgSgaXWLB5v-WiaZ2De7nYoVRoiQwbFCQi4pIv/pub?gid=0&single=true&output=csv";
-// si tienes un endpoint de Apps Script que acepta POST para guardar apartados, pégalo aquí (opcional)
-const SCRIPT_POST_URL = ""; // ejemplo: "https://script.google.com/macros/s/AKfy.../exec"
+const SCRIPT_POST_URL = "";
 const ADMIN_WA = "5635088487";
-
-let CONFIG = {}, vendidos = new Set(), seleccion = new Set();
-
-const $ = s => document.querySelector(s);
-const $$ = s => Array.from(document.querySelectorAll(s));
-
-/* ----- CARGA DATOS DESDE SHEETS (CSV) ----- */
-async function loadData(){
-  try{
-    const r = await fetch(CSV_URL);
-    const text = await r.text();
-    // CSV assumed rows: Tipo,Campo,Valor (ej: config,logo,https...)
-    // We'll parse simply:
-    const rows = text.trim().split("\n").map(r=>r.split(","));
-    CONFIG = {};
-    rows.forEach(c=>{
-      if(c.length>=3 && c[0].toLowerCase().trim()==='config'){
-        const campo = c[1].trim().toLowerCase();
-        const valor = c.slice(2).join(",").trim();
-        CONFIG[campo] = valor;
-      }
-    });
-    // normalize
-    CONFIG.imagenes = (CONFIG.imagenes||"").split(",").map(x=>x.trim()).filter(Boolean);
-    CONFIG.metodos_pago = (CONFIG.metodos_pago||"").split("|").map(x=>x.trim()).filter(Boolean);
-    CONFIG.promociones = CONFIG.promociones || "";
-    vendidos = new Set((CONFIG.vendidos||"").toString().split(",").map(s=>s.trim()).filter(Boolean));
-    renderAll();
-  }catch(err){
-    console.error(err);
-    $('#descripcion').textContent = "No se pudieron cargar los datos. Revisa CSV_URL y permisos.";
-  }
-}
-
-/* ----- RENDER ----- */
-function renderAll(){
-  // logo
-  $('#logo').src = CONFIG.logo || "";
-  // carousel
-  const car = $('#carouselRow'); car.innerHTML = "";
-  (CONFIG.imagenes||[]).forEach(src=>{ const i=document.createElement('img'); i.src=src; car.appendChild(i); });
-  // description
-  $('#descripcion').textContent = CONFIG.descripcion || "Sin descripción disponible.";
-  // methods
-  const m = $('#methodsArea'); m.innerHTML = "";
-  (CONFIG.metodos_pago || []).forEach(line=>{
-    const div = document.createElement('div'); div.style.display='flex'; div.style.justifyContent='space-between'; div.style.alignItems='center';
-    const span = document.createElement('div'); span.textContent = line; span.style.color='#bfe6ff';
-    const btn = document.createElement('button'); btn.className='copy-btn'; btn.textContent='Copiar';
-    btn.onclick = ()=>{ navigator.clipboard.writeText(line); btn.textContent = 'Copiado'; setTimeout(()=>btn.textContent='Copiar',1200); };
-    div.append(span,btn); m.appendChild(div);
-  });
-  // promos
-  $('#promos').textContent = CONFIG.promociones || "";
-  if((CONFIG.promociones||"").trim()) { $('#promotionsCard').style.display='block'; $('#promosList').textContent = CONFIG.promociones; }
-  else $('#promotionsCard').style.display='none';
-  $('#footerWa').textContent = CONFIG.whatsapp || ADMIN_WA;
-
-  // boletos
-  const total = Number(CONFIG.emisiones||0) || 0;
-  $('#counter').textContent = `🎟️ ${total} boletos — ${Math.max(0, total - (vendidos.size||0))} disponibles`;
-  renderGrid(total);
-}
-
-/* ----- GRID ----- */
-function padNum(i,total){ return i.toString().padStart(total>=10000?5:4,'0'); }
-function renderGrid(total){
-  const g = $('#grid'); g.innerHTML = "";
-  for(let i=1;i<=total;i++){
-    const label = padNum(i,total);
-    const el = document.createElement('div'); el.className='num'; el.textContent = label;
-    if(vendidos.has(label)) el.classList.add('vendido');
-    else el.onclick = ()=> toggleSelect(el,label);
-    g.appendChild(el);
-  }
-  updateUI();
-}
-
-function toggleSelect(el,label){
-  if(el.classList.contains('vendido')) return;
-  if(el.classList.contains('seleccionado')){ el.classList.remove('seleccionado'); seleccion.delete(label); }
-  else { el.classList.add('seleccionado'); seleccion.add(label); }
-  // show modal automatically when selecting numbers
-  openModalIfSelection();
-  updateUI();
-}
-
-function updateUI(){
-  const arr = Array.from(seleccion).sort((a,b)=>Number(a)-Number(b));
-  $('#selectionText').textContent = arr.length ? `Seleccionaste: ${arr.join(', ')}` : '';
-  $('#btnFloating').textContent = `📩 Apartar (${arr.length})`;
-  $('#floatingBtn').style.display = arr.length ? 'block' : 'none';
-}
-
-/* ----- MAQUINITA ----- */
-$('#btnGirar').onclick = ()=>{
-  const opt = $('#maqOpt').value;
-  const avail = $$('.num:not(.vendido)').map(n=>n.textContent);
-  let picks = [];
-  if(opt==='all') picks = avail;
-  else {
-    const count = Math.min(Number(opt), avail.length);
-    for(let i=0;i<count;i++){
-      const idx = Math.floor(Math.random()*avail.length);
-      picks.push(avail.splice(idx,1)[0]);
-    }
-  }
-  seleccion = new Set(picks);
-  $$('.num').forEach(n=> n.classList.toggle('seleccionado', seleccion.has(n.textContent)) );
-  $('#maqResult').textContent = picks.length ? 'Generados: ' + picks.join(', ') : '';
-  updateUI();
-};
-
-$('#btnSelAll').onclick = ()=>{
-  seleccion = new Set($$('.num:not(.vendido)').map(n=>n.textContent));
-  $$('.num').forEach(n=> n.classList.toggle('seleccionado', seleccion.has(n.textContent)) );
-  updateUI();
-};
-$('#btnLimpiar').onclick = ()=>{
-  seleccion.clear(); $$('.num.seleccionado').forEach(n=>n.classList.remove('seleccionado')); updateUI();
-};
-
-/* ----- MODAL / APARTAR ----- */
-function openModalIfSelection(){
-  const arr = Array.from(seleccion);
-  if(arr.length>0){
-    $('#modalNums').value = arr.join(', ');
-    $('#modalBack').style.display = 'flex';
-  }
-}
-$('#modalCerrar').onclick = ()=> $('#modalBack').style.display='none';
-
-$('#modalEnviar').onclick = async ()=>{
-  const nombre = $('#modalNombre').value.trim();
-  const estado = $('#modalEstado').value.trim();
-  const telefono = $('#modalTelefono').value.trim();
-  const nums = $('#modalNums').value.trim();
-  if(!nombre || !estado || !nums) return alert('Completa nombre, estado y números.');
-  // WhatsApp
-  const waMsg = `Hola Sorteos Arteaga, quiero apartar: ${nums}.%0ANombre: ${encodeURIComponent(nombre)}%0AEstado: ${encodeURIComponent(estado)}%0ATeléfono: ${encodeURIComponent(telefono)}`;
-  window.open(`https://wa.me/${CONFIG.whatsapp || ADMIN_WA}?text=${waMsg}`, '_blank');
-
-  // Intentar guardar en Apps Script si está definido
-  if(SCRIPT_POST_URL){
-    try {
-      const payload = { action:'apartar', nombre, estado, telefono, numeros: nums.split(',').map(s=>s.trim()), fecha: new Date().toISOString() };
-      const resp = await fetch(SCRIPT_POST_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      const text = await resp.text();
-      $('#modalMsg').textContent = '✅ Apartado guardado. ' + text;
-      // refrescar datos después
-      setTimeout(()=>{ seleccion.clear(); $$('.num.seleccionado').forEach(n=>n.classList.remove('seleccionado')); loadData(); $('#modalBack').style.display='none'; }, 900);
-      return;
-    } catch(err){
-      console.error('POST error',err);
-      $('#modalMsg').textContent = '⚠️ No se pudo guardar en Sheets (revisa SCRIPT_POST_URL / permisos).';
-    }
-  } else {
-    $('#modalMsg').textContent = '✅ WhatsApp abierto. (No hay SCRIPT_POST_URL configurado para guardar automáticamente.)';
-  }
-  // limpia selección local
-  seleccion.clear(); $$('.num.seleccionado').forEach(n=>n.classList.remove('seleccionado'));
-  setTimeout(()=>{ $('#modalBack').style.display='none'; }, 700);
-};
-
-/* ----- floating apartar quick ----- */
-$('#btnFloating').onclick = ()=> { openModalIfSelection(); };
-
-/* ----- INIT ----- */
-loadData();
-</script>
-</body>
-</html>
