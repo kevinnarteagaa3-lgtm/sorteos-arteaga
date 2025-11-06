@@ -26,11 +26,35 @@
   .carousel-row img{height:140px;border-radius:10px;object-fit:cover}
   .methods{background:#1a1a1a;color:var(--gold);padding:12px;border-radius:10px;font-weight:800;text-align:center}
   .promos{margin-top:8px;color:var(--gold);font-weight:800;text-align:center}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;margin-top:12px}
-  .num{padding:10px;border-radius:10px;text-align:center;font-weight:800;border:1px solid rgba(212,175,55,0.08);background:#111;color:var(--gold);cursor:pointer;transition:transform .12s}
-  .num:hover{transform:translateY(-6px)}
-  .num.seleccionado{background:var(--gold);color:#000;box-shadow:0 10px 30px rgba(212,175,55,0.12)}
-  .num.vendido{background:var(--gray);color:#111;cursor:not-allowed;border-color:#333}
+
+  /* 🔥 Mejoras visuales en la lista de boletos */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(70px,1fr));
+    gap:10px;
+    margin-top:14px;
+    justify-items:center;
+  }
+  .num{
+    width:100%;
+    max-width:80px;
+    aspect-ratio:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    font-weight:800;
+    font-size:15px;
+    border:1px solid rgba(212,175,55,0.15);
+    background:#111;
+    color:var(--gold);
+    cursor:pointer;
+    transition:all .15s;
+    box-shadow:0 0 10px rgba(0,0,0,0.3);
+  }
+  .num:hover{transform:scale(1.1);box-shadow:0 0 14px rgba(212,175,55,0.3)}
+  .num.seleccionado{background:var(--gold);color:#000;box-shadow:0 0 18px rgba(212,175,55,0.5)}
+  .num.vendido{background:var(--gray);color:#111;cursor:not-allowed;border-color:#333;opacity:0.7}
   .floating{position:fixed;right:18px;bottom:18px;z-index:999;display:none}
   .floating button{padding:16px 24px;font-size:16px;border-radius:14px;background:var(--red);color:#fff;border:none;font-weight:800;cursor:pointer}
   .seleccionTxt{margin-top:12px;color:var(--gold);font-weight:700;text-align:center}
@@ -40,7 +64,7 @@
   .modal h3{color:var(--gold);margin:0 0 10px 0;text-align:center}
   input,select,textarea{padding:10px;border-radius:8px;border:1px solid #222;background:#0a0a0a;color:#fff;width:100%;margin-top:8px}
   .row-flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:10px}
-  @media (max-width:900px){ .grid{grid-template-columns:repeat(auto-fill,minmax(48px,1fr))} }
+  @media (max-width:900px){ .grid{grid-template-columns:repeat(auto-fill,minmax(55px,1fr))} }
 </style>
 </head>
 <body>
@@ -62,7 +86,7 @@
   </div>
 
   <div class="card">
-    <div class="methods" id="methodsArea">Cargando métodos de pago...</div>
+    <div class="methods" id="methodsArea">Métodos de pago: Transferencia y depósitos en OXXO</div>
     <div id="promos" class="promos"></div>
   </div>
 
@@ -130,20 +154,19 @@
 </footer>
 
 <script>
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXgIMoW1LvdfzyJsFX75DuMWdoNctr7FAexHUz_TTgSgaXWLB5v-WiaZ2De7nYoVRoiQwbFCQi4pIv/pub?gid=0&single=true&output=csv";
-let CONFIG={}, vendidos=new Set(), seleccion=new Set();
-const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTXgIMoW1LvdfzyJsFX75DuMWdoNctr7FAexHUz_TTgSgaXWLB5v-WiaZ2De7nYoVRoiQwbFCQi4pIv/pub?gid=0&single=true&output=csv";
+let CONFIG={},vendidos=new Set(),seleccion=new Set();
+const $=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(s));
 
 async function loadData(){
   try{
-    const r=await fetch(CSV_URL); const text=await r.text();
-    const [header,...rows]=text.trim().split("\n").map(r=>r.split(","));
-    const map={}; header.forEach((h,i)=>map[h.trim().toLowerCase()]=i);
-    if(!rows.length) return;
+    const r=await fetch(CSV_URL);const text=await r.text();
+    const [h,...rows]=text.trim().split("\n").map(r=>r.split(","));
+    const map={};h.forEach((v,i)=>map[v.trim().toLowerCase()]=i);
+    if(!rows.length)return;
     const c=rows[0];
-    CONFIG.logo=c[map.logo]||""; CONFIG.descripcion=c[map.descripción]||""; CONFIG.whatsapp=c[map.whatsapp]||"";
-    CONFIG.promociones=c[map.promociones]||""; CONFIG.metodos_pago=(c[map.metodos_pago]||"").split("|");
-    CONFIG.emisiones=Number(c[map.emisiones]||0);
+    CONFIG.logo=c[map.logo]||"";CONFIG.descripcion=c[map.descripción]||"";CONFIG.whatsapp=c[map.whatsapp]||"";
+    CONFIG.promociones=c[map.promociones]||"";CONFIG.emisiones=Number(c[map.emisiones]||0);
     CONFIG.imagenes=(c[map.fotos]||"").split(",").map(s=>s.trim()).filter(Boolean);
     vendidos=new Set((c[map.boletos_apartados]||"").split(",").map(s=>s.trim()));
     renderAll();
@@ -154,21 +177,13 @@ function renderAll(){
   $('#logo').src=CONFIG.logo||"";
   $('#descripcion').textContent=CONFIG.descripcion||"Sin descripción";
   $('#footerWa').textContent=CONFIG.whatsapp||"";
-  const car=$('#carouselRow'); car.innerHTML="";
-  (CONFIG.imagenes||[]).forEach(x=>{const i=document.createElement('img'); i.src=x; car.appendChild(i);});
-  const m=$('#methodsArea'); m.innerHTML="";
-  (CONFIG.metodos_pago||[]).forEach(line=>{
-    const d=document.createElement('div'); d.style.display='flex'; d.style.justifyContent='space-between';
-    const span=document.createElement('span'); span.textContent=line;
-    const btn=document.createElement('button'); btn.textContent='Copiar'; btn.style.background= 'var(--red)'; btn.style.color='#fff'; btn.style.border='none'; btn.style.borderRadius='6px'; btn.style.padding='4px 8px';
-    btn.onclick=()=>{navigator.clipboard.writeText(line); btn.textContent='Copiado'; setTimeout(()=>btn.textContent='Copiar',1000);}
-    d.append(span,btn); m.appendChild(d);
-  });
+  const car=$('#carouselRow');car.innerHTML="";
+  (CONFIG.imagenes||[]).forEach(x=>{const i=document.createElement('img');i.src=x;car.appendChild(i);});
   $('#promos').textContent=CONFIG.promociones||"";
-  const total=CONFIG.emisiones||0; $('#counter').textContent=`🎟️ ${total} boletos — ${Math.max(0,total-vendidos.size)} disponibles`;
-  const g=$('#grid'); g.innerHTML="";
-  for(let i=1;i<=total;i++){const n=i.toString().padStart(5,"0"); const el=document.createElement('div'); el.className='num'; el.textContent=n;
-    if(vendidos.has(n)) el.classList.add('vendido');
+  const total=CONFIG.emisiones||0;$('#counter').textContent=`🎟️ ${total} boletos — ${Math.max(0,total-vendidos.size)} disponibles`;
+  const g=$('#grid');g.innerHTML="";
+  for(let i=1;i<=total;i++){const n=i.toString().padStart(5,"0");const el=document.createElement('div');el.className='num';el.textContent=n;
+    if(vendidos.has(n))el.classList.add('vendido');
     else el.onclick=()=>toggleSelect(el,n);
     g.appendChild(el);}
 }
@@ -177,33 +192,26 @@ function toggleSelect(el,n){if(el.classList.contains('vendido'))return;
   el.classList.toggle('seleccionado');
   el.classList.contains('seleccionado')?seleccion.add(n):seleccion.delete(n);
   updateUI();}
-
 function updateUI(){
   const arr=Array.from(seleccion).sort((a,b)=>a-b);
   $('#selectionText').textContent=arr.length?`Seleccionaste: ${arr.join(", ")}`:"";
   $('#floatingBtn').style.display=arr.length?'block':'none';
   $('#btnFloating').textContent=`📩 Apartar (${arr.length})`;
 }
-
 $('#btnFloating').onclick=()=>{$('#modalNums').value=Array.from(seleccion).join(", ");$('#modalBack').style.display='flex';}
 $('#modalCerrar').onclick=()=>$('#modalBack').style.display='none';
-
 $('#modalEnviar').onclick=()=>{
-  const nombre=$('#modalNombre').value.trim();
-  const estado=$('#modalEstado').value.trim();
-  const tel=$('#modalTelefono').value.trim();
-  const nums=$('#modalNums').value.trim();
+  const nombre=$('#modalNombre').value.trim(),estado=$('#modalEstado').value.trim(),tel=$('#modalTelefono').value.trim(),nums=$('#modalNums').value.trim();
   if(!nombre||!estado||!nums)return alert("Completa los datos");
   const waMsg=`Hola Sorteos Arteaga, quiero apartar: ${nums}.%0ANombre: ${nombre}%0AEstado: ${estado}%0ATeléfono: ${tel}`;
   window.open(`https://wa.me/${CONFIG.whatsapp}?text=${waMsg}`,'_blank');
-  seleccion.clear(); $$('.num.seleccionado').forEach(n=>n.classList.remove('seleccionado')); updateUI(); $('#modalBack').style.display='none';
+  seleccion.clear();$$('.num.seleccionado').forEach(n=>n.classList.remove('seleccionado'));updateUI();$('#modalBack').style.display='none';
 };
-
 $('#btnGirar').onclick=()=>{
-  const opt=$('#maqOpt').value; const avail=$$('.num:not(.vendido)').map(n=>n.textContent);
-  let picks=[]; if(opt==='all')picks=avail;
+  const opt=$('#maqOpt').value;const avail=$$('.num:not(.vendido)').map(n=>n.textContent);
+  let picks=[];if(opt==='all')picks=avail;
   else{const c=Math.min(Number(opt),avail.length);for(let i=0;i<c;i++){const idx=Math.floor(Math.random()*avail.length);picks.push(avail.splice(idx,1)[0]);}}
-  seleccion=new Set(picks); $$('.num').forEach(n=>n.classList.toggle('seleccionado',seleccion.has(n.textContent))); updateUI();
+  seleccion=new Set(picks);$$('.num').forEach(n=>n.classList.toggle('seleccionado',seleccion.has(n.textContent)));updateUI();
 };
 $('#btnSelAll').onclick=()=>{seleccion=new Set($$('.num:not(.vendido)').map(n=>n.textContent));$$('.num').forEach(n=>n.classList.toggle('seleccionado',seleccion.has(n.textContent)));updateUI();}
 $('#btnLimpiar').onclick=()=>{seleccion.clear();$$('.num.seleccionado').forEach(n=>n.classList.remove('seleccionado'));updateUI();}
