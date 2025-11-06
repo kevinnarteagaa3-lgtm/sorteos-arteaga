@@ -1,105 +1,145 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Panel Sorteos Arteaga</title>
-<style>
-  body{font-family:Arial,Helvetica,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding:20px}
-  h1{color:#D4AF37;text-align:center}
-  .card{background:#111;padding:16px;border-radius:10px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.08)}
-  label{display:block;margin-top:8px;font-weight:bold;color:#D4AF37}
-  input,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #333;background:#0a0a0a;color:#fff}
-  textarea{min-height:60px}
-  button{margin-top:12px;padding:12px 18px;border:none;border-radius:8px;background:#D4AF37;color:#000;font-weight:800;cursor:pointer}
-  button:hover{background:#c9a531}
-  .status{margin-top:10px;font-weight:700;text-align:center}
-  .info{color:#999;font-size:13px;margin-top:4px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración - Sorteos Arteaga</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #00c3ff;
+    }
+    input, textarea {
+      width: 90%;
+      padding: 10px;
+      margin: 8px;
+      border-radius: 8px;
+      border: none;
+      font-size: 15px;
+    }
+    textarea { height: 80px; }
+    label { display: block; margin-top: 15px; text-align: left; margin-left: 5%; }
+    button {
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    button:hover { background-color: #ff4444; }
+    .box {
+      background: #1b1b1b;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      width: 90%;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    input[type="url"] {
+      background-color: #222;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
-<h1>⚙️ Panel Sorteos Arteaga</h1>
 
-<div class="card">
-  <h3>Configuración general</h3>
-  <label>URL del logo</label>
-  <input id="logo" placeholder="https://...">
+  <h1>🎯 Panel de Administración - Sorteos Arteaga</h1>
 
-  <label>Descripción</label>
-  <textarea id="descripcion" placeholder="Texto de descripción del sorteo..."></textarea>
+  <div class="box">
+    <h3>URL pública de la hoja CSV</h3>
+    <input type="url" id="csvUrl" placeholder="Pega aquí el enlace público CSV de tu hoja (output=csv)" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vTXgIMoW1LvdfzyJsFX75DuMWdoNctr7FAexHUz_TTgSgaXWLB5v-WiaZ2De7nYoVRoiQwbFCQi4pIv/pub?gid=0&single=true&output=csv">
+    <button onclick="cargarDatos()">Cargar datos</button>
+  </div>
 
-  <label>Imágenes del carrusel (separadas por coma)</label>
-  <textarea id="imagenes" placeholder="https://img1.jpg, https://img2.jpg"></textarea>
+  <div class="box" id="panelEdicion" style="display:none;">
+    <h3>Editar información del sorteo</h3>
 
-  <label>Métodos de pago (cada uno separado con | )</label>
-  <textarea id="metodos_pago" placeholder="BBVA 1234567890 | OXXO 9999999999"></textarea>
+    <label>Logo (URL de imagen):</label>
+    <input type="text" id="logo">
 
-  <label>Promociones</label>
-  <input id="promociones" placeholder="Ej. 2x1 en compras de 10 boletos">
+    <label>Imágenes adicionales (URL separadas por coma):</label>
+    <input type="text" id="imagenes">
 
-  <label>WhatsApp de contacto</label>
-  <input id="whatsapp" placeholder="Ej. 5635088487">
+    <label>Descripción:</label>
+    <textarea id="descripcion"></textarea>
 
-  <label>Total de boletos (emisiones)</label>
-  <input id="emisiones" type="number" placeholder="Ej. 1000">
+    <label>WhatsApp:</label>
+    <input type="text" id="whatsapp">
 
-  <label>Números vendidos (separados por coma)</label>
-  <textarea id="vendidos" placeholder="0001,0002,0003"></textarea>
+    <label>Precio:</label>
+    <input type="text" id="precio">
 
-  <div class="info">⚠️ Guarda y actualiza. La página pública se actualizará automáticamente.</div>
+    <label>Promociones:</label>
+    <input type="text" id="promociones">
 
-  <button id="saveBtn">💾 Guardar en hoja</button>
-  <div id="status" class="status"></div>
-</div>
+    <label>Métodos de pago:</label>
+    <input type="text" id="metodos_pago">
 
-<script>
-const SHEET_POST_URL = "https://script.google.com/macros/s/AKfycbz3tEjemplo12345abcDEF/exec"; // 👉 reemplaza con tu URL de Apps Script
-const SHEET_READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXgIMoW1LvdfzyJsFX75DuMWdoNctr7FAexHUz_TTgSgaXWLB5v-WiaZ2De7nYoVRoiQwbFCQi4pIv/pub?gid=0&single=true&output=csv";
+    <label>Emisiones totales:</label>
+    <input type="text" id="emisiones">
 
-async function loadData(){
-  try{
-    const res = await fetch(SHEET_READ_URL);
-    const text = await res.text();
-    const rows = text.trim().split("\n").map(r=>r.split(","));
-    const data = {};
-    rows.forEach(c=>{
-      if(c.length>=3 && c[0].toLowerCase().trim()==='config'){
-        const campo = c[1].trim().toLowerCase();
-        const valor = c.slice(2).join(",").trim();
-        data[campo] = valor;
+    <label>Boletos apartados (separados por comas):</label>
+    <input type="text" id="boletos_apartados">
+
+    <button onclick="generarFilas()">Generar filas para Sheets</button>
+
+    <h4>⬇️ Copia y pega esto en tu hoja de Google Sheets:</h4>
+    <textarea id="output" readonly></textarea>
+  </div>
+
+  <script>
+    async function cargarDatos() {
+      const url = document.getElementById('csvUrl').value.trim();
+      if (!url) return alert('Pega primero la URL pública del CSV');
+
+      try {
+        const response = await fetch(url);
+        const text = await response.text();
+        const filas = text.split('\n').map(r => r.split(','));
+        const encabezados = filas[0].map(e => e.trim().toLowerCase());
+        const valores = filas[1] || [];
+        const info = {};
+        encabezados.forEach((h, i) => info[h] = valores[i]?.trim() || '');
+
+        document.getElementById('logo').value = info.logo || '';
+        document.getElementById('imagenes').value = info.fotos || info.imagenes || '';
+        document.getElementById('descripcion').value = info.descripcion || '';
+        document.getElementById('whatsapp').value = info.whatsapp || '';
+        document.getElementById('precio').value = info.precio || '';
+        document.getElementById('promociones').value = info.promociones || '';
+        document.getElementById('metodos_pago').value = info.metodos_pago || '';
+        document.getElementById('emisiones').value = info.emisiones || '';
+        document.getElementById('boletos_apartados').value = info.boletos_apartados || '';
+
+        document.getElementById('panelEdicion').style.display = 'block';
+      } catch (error) {
+        alert('No se pudo cargar la hoja. Revisa que esté publicada en formato CSV.');
       }
-    });
-    // rellenar campos
-    for(const k in data){ if(document.getElementById(k)) document.getElementById(k).value = data[k]; }
-  }catch(err){
-    document.getElementById("status").textContent = "❌ Error al leer la hoja.";
-  }
-}
+    }
 
-document.getElementById("saveBtn").onclick = async ()=>{
-  const payload = {
-    action: "updateConfig",
-    logo: logo.value,
-    descripcion: descripcion.value,
-    imagenes: imagenes.value,
-    metodos_pago: metodos_pago.value,
-    promociones: promociones.value,
-    whatsapp: whatsapp.value,
-    emisiones: emisiones.value,
-    vendidos: vendidos.value
-  };
-  document.getElementById("status").textContent = "⏳ Guardando...";
-  try{
-    const res = await fetch(SHEET_POST_URL, {method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const t = await res.text();
-    document.getElementById("status").textContent = "✅ Guardado: " + t;
-  }catch(err){
-    console.error(err);
-    document.getElementById("status").textContent = "⚠️ Error al guardar (revisa el Apps Script).";
-  }
-};
+    function generarFilas() {
+      const campos = [
+        'logo','imagenes','descripcion','whatsapp','precio','promociones','metodos_pago','emisiones','boletos_apartados'
+      ];
+      let texto = 'Logo,Imagenes,Descripcion,Whatsapp,Precio,Promociones,Metodos_pago,Emisiones,Boletos_apartados\n';
+      const fila = campos.map(id => document.getElementById(id).value.replace(/\n/g, ' '));
+      texto += fila.join(',') + '\n';
+      document.getElementById('output').value = texto;
 
-loadData();
-</script>
+      alert('✅ Copia el texto generado y pégalo en tu hoja de Google Sheets.\nLuego publícala de nuevo como CSV.');
+    }
+  </script>
 </body>
 </html>
