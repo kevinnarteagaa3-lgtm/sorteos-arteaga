@@ -1,145 +1,105 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Administración - Sorteos Arteaga</title>
-  <style>
-    body {
-      background-color: #111;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      text-align: center;
-    }
-    h1 {
-      color: #00c3ff;
-    }
-    input, textarea {
-      width: 90%;
-      padding: 10px;
-      margin: 8px;
-      border-radius: 8px;
-      border: none;
-      font-size: 15px;
-    }
-    textarea { height: 80px; }
-    label { display: block; margin-top: 15px; text-align: left; margin-left: 5%; }
-    button {
-      background-color: red;
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      font-size: 16px;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-top: 20px;
-      font-weight: bold;
-    }
-    button:hover { background-color: #ff4444; }
-    .box {
-      background: #1b1b1b;
-      padding: 20px;
-      border-radius: 12px;
-      margin-top: 20px;
-      width: 90%;
-      max-width: 700px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    input[type="url"] {
-      background-color: #222;
-      color: #fff;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Panel Sorteos Arteaga</title>
+<style>
+  :root{
+    --gold:#D4AF37;
+    --red:#e53935;
+    --gray:#333;
+    --black:#000;
+    --white:#fff;
+  }
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--black);color:var(--white);padding:16px}
+  h1{color:var(--gold);text-align:center;margin-bottom:20px}
+  label{display:block;margin-top:14px;font-weight:600;color:var(--gold)}
+  input,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #222;background:#111;color:#fff}
+  textarea{min-height:80px}
+  button{background:var(--red);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;margin-top:14px}
+  button:hover{opacity:.9}
+  .section{max-width:680px;margin:0 auto;margin-bottom:32px;background:#0b0b0b;padding:18px;border-radius:12px;border:1px solid #222}
+  footer{text-align:center;margin-top:18px;color:#888;font-size:13px}
+  .msg{color:var(--gold);font-weight:700;text-align:center;margin-top:8px}
+</style>
 </head>
 <body>
 
-  <h1>🎯 Panel de Administración - Sorteos Arteaga</h1>
+<h1>🛠 Panel Sorteos Arteaga</h1>
 
-  <div class="box">
-    <h3>URL pública de la hoja CSV</h3>
-    <input type="url" id="csvUrl" placeholder="Pega aquí el enlace público CSV de tu hoja (output=csv)" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vTXgIMoW1LvdfzyJsFX75DuMWdoNctr7FAexHUz_TTgSgaXWLB5v-WiaZ2De7nYoVRoiQwbFCQi4pIv/pub?gid=0&single=true&output=csv">
-    <button onclick="cargarDatos()">Cargar datos</button>
+<div class="section">
+  <label>URL pública CSV de tu hoja (output=csv)</label>
+  <input id="csvUrl" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
+  <button id="btnCargar">Cargar datos</button>
+</div>
+
+<div class="section" id="formArea" style="display:none">
+  <label>Logo (URL)</label><input id="logo">
+  <label>Fotos (separadas por coma)</label><input id="fotos">
+  <label>Descripción</label><textarea id="descripcion"></textarea>
+  <label>WhatsApp (sin + ni espacios)</label><input id="whatsapp">
+  <label>Precio</label><input id="precio">
+  <label>Promociones</label><input id="promos">
+  <label>Métodos de pago (separados por |)</label><textarea id="metodos"></textarea>
+  <label>Emisiones</label><input id="emisiones" type="number">
+  <label>Boletos apartados (separados por coma)</label><textarea id="apartados"></textarea>
+
+  <div style="text-align:center">
+    <button id="btnGenerar">Generar filas para Sheets</button>
   </div>
+  <div class="msg" id="msg"></div>
+</div>
 
-  <div class="box" id="panelEdicion" style="display:none;">
-    <h3>Editar información del sorteo</h3>
+<div class="section" id="outputArea" style="display:none">
+  <label>Bloque generado (para copiar a tu hoja en columnas Tipo | Campo | Valor)</label>
+  <textarea id="output" readonly></textarea>
+  <div class="msg">📋 Copia este bloque y pégalo en tu hoja — luego publica como CSV.</div>
+</div>
 
-    <label>Logo (URL de imagen):</label>
-    <input type="text" id="logo">
+<footer>© 2025 Sorteos Arteaga — Panel administrativo</footer>
 
-    <label>Imágenes adicionales (URL separadas por coma):</label>
-    <input type="text" id="imagenes">
+<script>
+let datos={};
+const $=s=>document.querySelector(s);
 
-    <label>Descripción:</label>
-    <textarea id="descripcion"></textarea>
+$('#btnCargar').onclick=async()=>{
+  const url=$('#csvUrl').value.trim();
+  if(!url)return alert("Pega la URL CSV pública de tu hoja");
+  try{
+    const res=await fetch(url); const text=await res.text();
+    const [header,...rows]=text.trim().split("\n").map(r=>r.split(","));
+    if(!rows.length)return alert("No se encontraron datos en la hoja");
+    const map={}; header.forEach((h,i)=>map[h.trim().toLowerCase()]=i);
+    const c=rows[0];
+    datos={
+      logo:c[map.logo]||"",
+      fotos:c[map.fotos]||"",
+      descripcion:c[map.descripción]||"",
+      whatsapp:c[map.whatsapp]||"",
+      precio:c[map.precio]||"",
+      promociones:c[map.promociones]||"",
+      metodos_pago:c[map.metodos_pago]||"",
+      emisiones:c[map.emisiones]||"",
+      boletos_apartados:c[map.boletos_apartados]||""
+    };
+    Object.keys(datos).forEach(k=>{if($('#'+k))$('#'+k).value=datos[k];});
+    $('#formArea').style.display='block';
+    $('#msg').textContent="✅ Datos cargados. Puedes editarlos.";
+  }catch(e){alert("Error al leer la hoja. Revisa la URL.");}
+};
 
-    <label>WhatsApp:</label>
-    <input type="text" id="whatsapp">
+$('#btnGenerar').onclick=()=>{
+  const c=(id)=>$('#'+id).value.trim();
+  const block=[
+    `logo,fotos,descripción,whatsapp,precio,promociones,metodos_pago,emisiones,boletos_apartados`,
+    `${c('logo')},${c('fotos')},${c('descripcion')},${c('whatsapp')},${c('precio')},${c('promos')},${c('metodos')},${c('emisiones')},${c('apartados')}`
+  ].join("\n");
+  $('#output').value=block;
+  $('#outputArea').style.display='block';
+  $('#msg').textContent="✅ Bloque generado, copia y pégalo en tu hoja.";
+};
+</script>
 
-    <label>Precio:</label>
-    <input type="text" id="precio">
-
-    <label>Promociones:</label>
-    <input type="text" id="promociones">
-
-    <label>Métodos de pago:</label>
-    <input type="text" id="metodos_pago">
-
-    <label>Emisiones totales:</label>
-    <input type="text" id="emisiones">
-
-    <label>Boletos apartados (separados por comas):</label>
-    <input type="text" id="boletos_apartados">
-
-    <button onclick="generarFilas()">Generar filas para Sheets</button>
-
-    <h4>⬇️ Copia y pega esto en tu hoja de Google Sheets:</h4>
-    <textarea id="output" readonly></textarea>
-  </div>
-
-  <script>
-    async function cargarDatos() {
-      const url = document.getElementById('csvUrl').value.trim();
-      if (!url) return alert('Pega primero la URL pública del CSV');
-
-      try {
-        const response = await fetch(url);
-        const text = await response.text();
-        const filas = text.split('\n').map(r => r.split(','));
-        const encabezados = filas[0].map(e => e.trim().toLowerCase());
-        const valores = filas[1] || [];
-        const info = {};
-        encabezados.forEach((h, i) => info[h] = valores[i]?.trim() || '');
-
-        document.getElementById('logo').value = info.logo || '';
-        document.getElementById('imagenes').value = info.fotos || info.imagenes || '';
-        document.getElementById('descripcion').value = info.descripcion || '';
-        document.getElementById('whatsapp').value = info.whatsapp || '';
-        document.getElementById('precio').value = info.precio || '';
-        document.getElementById('promociones').value = info.promociones || '';
-        document.getElementById('metodos_pago').value = info.metodos_pago || '';
-        document.getElementById('emisiones').value = info.emisiones || '';
-        document.getElementById('boletos_apartados').value = info.boletos_apartados || '';
-
-        document.getElementById('panelEdicion').style.display = 'block';
-      } catch (error) {
-        alert('No se pudo cargar la hoja. Revisa que esté publicada en formato CSV.');
-      }
-    }
-
-    function generarFilas() {
-      const campos = [
-        'logo','imagenes','descripcion','whatsapp','precio','promociones','metodos_pago','emisiones','boletos_apartados'
-      ];
-      let texto = 'Logo,Imagenes,Descripcion,Whatsapp,Precio,Promociones,Metodos_pago,Emisiones,Boletos_apartados\n';
-      const fila = campos.map(id => document.getElementById(id).value.replace(/\n/g, ' '));
-      texto += fila.join(',') + '\n';
-      document.getElementById('output').value = texto;
-
-      alert('✅ Copia el texto generado y pégalo en tu hoja de Google Sheets.\nLuego publícala de nuevo como CSV.');
-    }
-  </script>
 </body>
 </html>
