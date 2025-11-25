@@ -218,7 +218,7 @@ async function loadData(){
 
 function renderAll(){
   $('#logo').src=CONFIG.logo||"";
-  $('#descripcion').textContent=CONFIG.descripcion||"Sin descripción";
+  $('#descripcion').innerHTML = (CONFIG.descripcion || "Sin descripción").replace(/\n/g, "<br>");
   $('#footerWa').textContent=CONFIG.whatsapp||"";
   const car=$('#carouselRow');car.innerHTML="";
   (CONFIG.imagenes||[]).forEach(x=>{const i=document.createElement('img');i.src=x;car.appendChild(i);});
