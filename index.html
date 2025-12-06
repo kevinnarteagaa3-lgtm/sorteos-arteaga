@@ -314,7 +314,7 @@ async function loadData(){
     const map={};h.forEach((v,i)=>map[v.trim().toLowerCase()]=i);
     if(!rows.length)return;
     const c=rows[0];
-    CONFIG.logo=c[map.logo]||"";CONFIG.descripcion=c[map.descripción]||"";CONFIG.whatsapp=c[map.whatsapp]||"";
+    CONFIG.logo=c[map.logo]||"";CONFIG.whatsapp=c[map.whatsapp]||"";
     CONFIG.promociones=c[map.promociones]||"";CONFIG.emisiones=Number(c[map.emisiones]||0);
     CONFIG.imagenes=(c[map.fotos]||"").split(",").map(s=>s.trim()).filter(Boolean);
     vendidos=new Set((c[map.boletos_apartados]||"").split(",").map(s=>s.trim()));
