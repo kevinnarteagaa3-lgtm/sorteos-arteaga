@@ -114,7 +114,7 @@
     </span>
     <br><br>
 
-    Se va 28 de Febrero 2026 ⭐ – Base Lotería Nacional 🇲🇽 (TRIS Clásico) <br>
+    Se va 28 de Febrero ya 2026 ⭐ – Base Lotería Nacional 🇲🇽 (TRIS Clásico) <br>
     Con las últimas 4 cifras del premio ⭐ <br><br>
 
     Solo <strong style="color:#D4AF37;">1000 emisiones</strong> 🔥 – $400 c/u ⭐ <br><br>
@@ -134,9 +134,9 @@
     • Bono 4: Comprando 4+ números → Más botellas + más cerveza + $14,000 extra (más de  
     <strong style="color:#D4AF37;">$45,000 en efectivo</strong>).<br><br>
 
-    Envío incluido adquiriendo desde 1 número antes del 16 febrero 2026.<br><br>
+    Envío incluido adquiriendo desde 1 número antes del 28 de febrero del 2026.<br><br>
 
-    Se va con TRIS porque hay sorteos diarios y transmisión en vivo 🎥⭐<br><br>
+    Se va con TRIS Clasico porque hay sorteos diarios y en sorteos tradicionales no sabemos cuales van a ser los del 2026 se va con transmisión en vivo 🎥⭐<br><br>
 
     <strong style="color:#D4AF37;">Gracias por participar. ¡Bendiciones y mucho éxito! 🙌</strong>
 
@@ -323,19 +323,37 @@ async function loadData(){
 }
 
 function renderAll(){
-  $('#logo').src=CONFIG.logo||"";
-  $('#descripcion').innerHTML = (CONFIG.descripcion || "Sin descripción").replace(/\n/g, "<br>");
-  $('#footerWa').textContent=CONFIG.whatsapp||"";
-  const car=$('#carouselRow');car.innerHTML="";
-  (CONFIG.imagenes||[]).forEach(x=>{const i=document.createElement('img');i.src=x;car.appendChild(i);});
-  $('#promos').textContent=CONFIG.promociones||"";
-  const total=CONFIG.emisiones||0;$('#counter').textContent=`🎟️ ${total} boletos — ${Math.max(0,total-vendidos.size)} disponibles`;
-  const g=$('#grid');g.innerHTML="";
-  for(let i=1;i<=total;i++){const n=i.toString().padStart(5,"0");const el=document.createElement('div');el.className='num';el.textContent=n;
-    if(vendidos.has(n))el.classList.add('vendido');
-    else el.onclick=()=>toggleSelect(el,n);
-    g.appendChild(el);}
+  $('#logo').src = CONFIG.logo || "";
+  // YA NO TOQUES #descripcion — queda fija en el HTML
+
+  $('#footerWa').textContent = CONFIG.whatsapp || "";
+
+  const car = $('#carouselRow');
+  car.innerHTML = "";
+  (CONFIG.imagenes || []).forEach(x=>{
+    const i = document.createElement('img');
+    i.src = x;
+    car.appendChild(i);
+  });
+
+  $('#promos').textContent = CONFIG.promociones || "";
+
+  const total = CONFIG.emisiones || 0;
+  $('#counter').textContent = `🎟️ ${total} boletos — ${Math.max(0, total - vendidos.size)} disponibles`;
+
+  const g = $('#grid');
+  g.innerHTML = "";
+  for(let i=1;i<=total;i++){
+    const n = i.toString().padStart(5,"0");
+    const el = document.createElement('div');
+    el.className = 'num';
+    el.textContent = n;
+    if (vendidos.has(n)) el.classList.add('vendido');
+    else el.onclick = () => toggleSelect(el,n);
+    g.appendChild(el);
+  }
 }
+
 
 function toggleSelect(el,n){if(el.classList.contains('vendido'))return;
   el.classList.toggle('seleccionado');
