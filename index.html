@@ -378,6 +378,7 @@ $('#maqApartar').onclick=()=>{
 
 $('#btnSelAll').onclick=()=>{seleccion=new Set($$('.num:not(.vendido)').map(n=>n.textContent));$$('.num').forEach(n=>n.classList.toggle('seleccionado',seleccion.has(n.textContent)));updateUI();}
 $('#btnLimpiar').onclick=()=>{seleccion.clear();$$('.num.seleccionado').forEach(n=>n.classList.remove('seleccionado'));updateUI();}
+loadData();
 </script>
 </body>
 </html>
